@@ -1,6 +1,7 @@
 #12
 .model sample01
-.inputs a d
+.inputs a d \
+y u i
 .outputs g
 .names a d g  ## 12
 # 1212
