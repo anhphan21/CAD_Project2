@@ -3,38 +3,48 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 class Graph{
-    struct Wire;
-    
-    struct  Gate {
-        string      Gate_ID;
-        bool        OP_code;                //0: AND, 1: OR
-        int         delay;
-        vector<Wire*> out;
+    enum op_code {
+        Not = -1,
+        And = 0,
+        Or  = 1
     };
 
     struct Wire {
-        string  Wire_ID;
-        bool    inv;                        //0: not invert, 1: inversion
-        int     req_time, arr_time, slack;
-        Gate    *next;
+        int             req_time, arr_time, slack = 0;
+        vector<int>     nxt_gate;
+    };
+
+    struct  Gate {
+        string          output_name;
+        int             operation;                //-1: Not, 0: AND, 1: OR
+        int             delay = 1;
+        Wire            out;
+    };
+
+    struct Input {
+        string          in_name;
+        int             req_time, arr_time, slack = 0;
+        vector<int>     nxt_gate;
     };
     
     private:
         string module_name;
-        vector<Wire> list_wire;
         vector<Gate> list_gate;
+        vector<Input> list_input;
         int no_gate;
         int no_wire;
     public:
         Graph();
         ~Graph();
-        void add_Gate();
-        void add_Wire();
-        void get_Predecessors(string);
-        void get_Successors(string);
+        void setModuleName(string);
+        int find_gate_idx(string);
+
+        void add_Gate(vector<string>, string, int);
+
         void printGraph();
 };
 
