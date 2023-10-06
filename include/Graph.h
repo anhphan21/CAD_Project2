@@ -41,11 +41,12 @@ class Graph{
         Graph();
         ~Graph();
         void setModuleName(string);
+        string getModuleName();
         int find_gate_idx(string);
-
         void add_Gate(vector<string>, string, int);
-
-        void printGraph();
+        vector<string> find_Successor(string);
+        vector<string> find_Predecessor(string);
+        void print_Graph();
 };
 
 #endif

@@ -5,7 +5,6 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-
 	int AND_MAX;
 	int OR_MAX;
 	int INV_MAX;
