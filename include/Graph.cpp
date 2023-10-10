@@ -20,7 +20,7 @@ int Graph::get_gate_idx(string output_name) {
         if (list_gate[i].out.wire_name == output_name)
             return i;
     }
-    cout << "Cannot find the gate corresponding to wire " << output_name << "!" << endl;
+    // cout << "Cannot find the gate corresponding to wire " << output_name << "!" << endl;
     return -1;
 }
 
@@ -140,6 +140,7 @@ vector<int> Graph::get_predecessor_gate(string output_name) {
     vector<int> precessor;
     //1st: Check index of the gate with coressponding name
     int gate_idx = get_gate_idx(output_name);
+    
     if (gate_idx != -1) {
     //2rd: If exist gate then travel along the gate list to check the nxt_gate list of the gate then push_back to precessor
         for (int i = 0; i < no_gate; i++) {
@@ -149,7 +150,7 @@ vector<int> Graph::get_predecessor_gate(string output_name) {
                 for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
                     int check_idx = list_gate[i].out.nxt_gate[j];
                     if (check_idx == gate_idx)
-                        precessor.push_back(check_idx);
+                        precessor.push_back(i);
                 }
             }
         }   
@@ -167,15 +168,15 @@ void Graph::print_Gate(int idx) {
     cout << endl << "----------" << endl;
 }
 
-void Graph::print_Input(int idx) {
-    cout << "----------" << endl;
-    cout << "Name: " << list_input[idx].wire_name << endl;
-    cout << "Nxt_gate: ";
-    for (int i = 0; i < list_input[idx].nxt_gate.size(); i++) {
-        cout << list_input[idx].nxt_gate[i] << " ";
-    }
-    cout << endl;
-}
+// void Graph::print_Input(int idx) {
+//     cout << "----------" << endl;
+//     cout << "Name: " << list_input[idx].wire_name << endl;
+//     cout << "Nxt_gate: ";
+//     for (int i = 0; i < list_input[idx].nxt_gate.size(); i++) {
+//         cout << list_input[idx].nxt_gate[i] << " ";
+//     }
+//     cout << endl;
+// }
 
 void Graph::print_Graph() {
     cout << "--------------------" << endl;
@@ -189,21 +190,21 @@ void Graph::print_Graph() {
     cout << "Gate:" << endl;
     
     for (int i = 0; i < no_gate; i++) {
-        cout << i+1 << ". " <<  list_gate[i].out.wire_name << "=" ;
+        cout << i+1 << ".\t" <<  list_gate[i].out.wire_name << "=" ;
 
         int op_code = list_gate[i].operation;
         string op_code_s;
         if (op_code == -1)
             op_code_s = "\'";
         else if (op_code == 0)
-            op_code_s = ""; 
+            op_code_s = "."; 
         else
             op_code_s = "+";
 
         vector<string> inputs = get_gate_inputs(list_gate[i].out.wire_name);     
-        for (int j = 0; j < inputs.size(); j++)
+        for (int j = 0; j < inputs.size()-1; j++)
             cout << inputs[j] << op_code_s;
-        cout << endl;
+        cout << inputs.back() << endl;
     }
 
     cout << "--------------------" << endl;

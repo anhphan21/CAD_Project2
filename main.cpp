@@ -156,6 +156,15 @@ int main(int argc, char* argv[]) {
 	cout << "Done reading file" << endl;
 
 	circuit.print_Graph();
+	vector<int> pre_check = circuit.get_predecessor_gate("o");
+	// // cout << pre_check.size() << endl;
+	for (int i = 0; i < pre_check.size(); i++)
+		cout << circuit.get_gate_name(pre_check[i]) << " ";
+	cout << endl;
 
+	vector<int> suc_check = circuit.get_successor_gate("i");
+	for (int i = 0; i < suc_check.size(); i++)
+		cout << circuit.get_gate_name(suc_check[i]) << " ";
+	cout << endl;
 	return 0;
 }

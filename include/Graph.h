@@ -44,7 +44,7 @@ class Graph{
         vector<int> get_successor_gate(string);
         vector<int> get_predecessor_gate(string);
 
-        void print_Input(int);
+        // void print_Input(int);
         void print_Gate(int);
         void print_Graph();
 };
