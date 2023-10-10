@@ -1,6 +1,11 @@
-CXX 	= g++
-CXXLAGS = -Wall
-EXEC	=
+CXX 		= g++
+CXXLAGS 	= -Wall
+TARGET_EXEC	= 
+BUILD_DIR 	= ./build
+SRC_DIRS	= ./src
+
+#SRCS := $(shell find $(SRC_DIRS) -name '*.cpp' -or -name '*.c' -or -name '*.s')
+#OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 main:
 	${CXX} ${CXXLAGS} ./include/Graph.cpp main.cpp -o out.o

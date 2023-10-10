@@ -1,11 +1,12 @@
-#12
 .model sample01
-.inputs a d \
-y u i       
-.outputs g 
-.names a d g
-1- 1
--1 1
-.names a y
+.inputs a b h
+.outputs m c d
+.names a m
 0 1
+.names a b c
+11 1
+.names a b h d
+1-- 1
+-1- 1
+--0 1
 .end
