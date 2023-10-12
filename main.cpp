@@ -10,10 +10,7 @@ int main(int argc, char* argv[]) {
 	int INV_MAX;
 
 	Graph circuit;
-
 	string module_name;
-	vector<string> in_list, out_list;
-	vector<string> funct;
 
 	// Read blif file and extract data
 	ifstream 	blif_file(argv[1]);
@@ -155,9 +152,10 @@ int main(int argc, char* argv[]) {
 	blif_file.close();
 	cout << "Done reading file" << endl;
 
+	//Check result
 	circuit.print_Graph();
+	
 	vector<int> pre_check = circuit.get_predecessor_gate("o");
-	// // cout << pre_check.size() << endl;
 	for (int i = 0; i < pre_check.size(); i++)
 		cout << circuit.get_gate_name(pre_check[i]) << " ";
 	cout << endl;
@@ -166,5 +164,14 @@ int main(int argc, char* argv[]) {
 	for (int i = 0; i < suc_check.size(); i++)
 		cout << circuit.get_gate_name(suc_check[i]) << " ";
 	cout << endl;
+
+	vector<int> out_check = circuit.get_circuit_outputs();
+	for (int i = 0; i < out_check.size(); i++)
+		cout << circuit.get_gate_name(out_check[i]) << " ";
+	cout << endl;
+
+	// circuit.list_scheduling();
+	// circuit.print_Schedule();
+
 	return 0;
 }

@@ -11,6 +11,28 @@ Graph::~Graph() {
     list_input.empty();
 }
 
+vector<int> Graph::get_gate_inputs_from_in(int in_idx) {
+    vector<int> inputs;
+    for (int i = 0; i < list_input.size(); i++) {
+        for (int j = 0; j < list_input[i].nxt_gate.size(); j++) {
+            if (list_input[i].nxt_gate[j] == in_idx)
+                inputs.push_back(i);
+        }
+    }
+    return inputs;
+}
+
+vector<int> Graph::get_gate_inputs_from_gate(int gate_idx) {
+    vector<int> inputs;
+    for (int i = 0; i < list_gate.size(); i++) {
+        for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
+            if (list_gate[i].out.nxt_gate[j] == gate_idx)
+                inputs.push_back(i);
+        }
+    }
+    return inputs;
+}
+
 void Graph::setModuleName(string name)  { module_name = name; }
 
 string Graph::getModuleName()   { return module_name; }
@@ -41,20 +63,14 @@ vector<string> Graph::get_gate_inputs(string gate_name) {
 
     int gate_idx = get_gate_idx(gate_name);
     
-    for (int i = 0; i < list_input.size(); i++) {
-        for (int j = 0; j < list_input[i].nxt_gate.size(); j++) {
-            if (list_input[i].nxt_gate[j] == gate_idx) {
-                inputs.push_back(list_input[i].wire_name);
-            }
-        }
-    }
+    vector<int> in_list = get_gate_inputs_from_in(gate_idx);
+    for (int i = 0; i < in_list.size(); i++)
+        inputs.push_back(list_input[in_list[i]].wire_name);
+    
+    in_list = get_gate_inputs_from_gate(gate_idx);
+    for (int i = 0; i < in_list.size(); i++)
+        inputs.push_back(list_gate[in_list[i]].out.wire_name);
 
-    for (int i = 0; i < list_gate.size(); i++) {
-        for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
-            if (list_gate[i].out.nxt_gate[j] == gate_idx)
-                inputs.push_back(list_gate[i].out.wire_name);
-        }
-    }
     return inputs;
 }
 
@@ -158,6 +174,16 @@ vector<int> Graph::get_predecessor_gate(string output_name) {
     return precessor;
 }
 
+vector<int> Graph::get_circuit_outputs() {
+    vector<int> outputs;
+    for (int i = 0; i < no_gate; i++) {
+        if (list_gate[i].out.nxt_gate.size() == 0) {
+            outputs.push_back(i);
+        }
+    }
+    return outputs;
+}
+
 void Graph::print_Gate(int idx) {
     cout << "----------" << endl;
     cout << "Gate: " << list_gate[idx].out.wire_name << endl;
@@ -190,7 +216,7 @@ void Graph::print_Graph() {
     cout << "Gate:" << endl;
     
     for (int i = 0; i < no_gate; i++) {
-        cout << i+1 << ".\t" <<  list_gate[i].out.wire_name << "=" ;
+        cout << i << ".\t" <<  list_gate[i].out.wire_name << "=" ;
 
         int op_code = list_gate[i].operation;
         string op_code_s;

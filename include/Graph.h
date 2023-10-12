@@ -3,7 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include <iostream>
+#include <algorithm>
+
 using namespace std;
 
 class Graph{
@@ -33,6 +36,8 @@ class Graph{
         int get_gate_idx(string);
         string get_gate_name(int);
         int get_input_idx(string);
+        vector<int> get_gate_inputs_from_gate(int);
+        vector<int> get_gate_inputs_from_in(int);
         vector<string> get_gate_inputs(string);
         
         void add_Input(string);
@@ -43,10 +48,12 @@ class Graph{
         
         vector<int> get_successor_gate(string);
         vector<int> get_predecessor_gate(string);
+        vector<int> get_circuit_outputs();
 
         // void print_Input(int);
         void print_Gate(int);
         void print_Graph();
+
 };
 
 #endif
