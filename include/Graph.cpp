@@ -1,30 +1,32 @@
 #include "./Graph.h"
-
+//Done
 Graph::Graph() {
-    list_input.resize(0);
     list_gate.resize(0);
-    no_gate = 0;
+    no_node = 0;
 }
 
 Graph::~Graph() {
     list_gate.empty();
-    list_input.empty();
 }
 
-vector<int> Graph::get_gate_inputs_from_in(int in_idx) {
-    vector<int> inputs;
-    for (int i = 0; i < list_input.size(); i++) {
-        for (int j = 0; j < list_input[i].nxt_gate.size(); j++) {
-            if (list_input[i].nxt_gate[j] == in_idx)
-                inputs.push_back(i);
-        }
+void Graph::setModuleName(string name)  { module_name = name; }
+
+string Graph::getModuleName()   { return module_name; }
+
+int Graph::get_wire_idx(string output_name) {
+    for (int i = 0; i < no_node; i++) {
+        if (list_gate[i].out.wire_name == output_name)
+            return i;
     }
-    return inputs;
+    // cout << "Cannot find the gate corresponding to wire " << output_name << "!" << endl;
+    return -1;
 }
 
-vector<int> Graph::get_gate_inputs_from_gate(int gate_idx) {
+string Graph::get_wire_name(int idx) { return list_gate[idx].out.wire_name; } 
+
+vector<int> Graph::get_gate_inputs(int gate_idx) {
     vector<int> inputs;
-    for (int i = 0; i < list_gate.size(); i++) {
+    for (int i = 0; i < no_node; i++) {
         for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
             if (list_gate[i].out.nxt_gate[j] == gate_idx)
                 inputs.push_back(i);
@@ -33,52 +35,16 @@ vector<int> Graph::get_gate_inputs_from_gate(int gate_idx) {
     return inputs;
 }
 
-void Graph::setModuleName(string name)  { module_name = name; }
-
-string Graph::getModuleName()   { return module_name; }
-
-int Graph::get_gate_idx(string output_name) {
-    for (int i = 0; i < no_gate; i++) {
-        if (list_gate[i].out.wire_name == output_name)
-            return i;
-    }
-    // cout << "Cannot find the gate corresponding to wire " << output_name << "!" << endl;
-    return -1;
-}
-
-int Graph::get_input_idx(string in_name) {
-    for (int i = 0; i < list_input.size(); i++) {
-        if (list_input[i].wire_name == in_name)
-            return i;
-    }
-    return -1;
-}
-
-string Graph::get_gate_name(int idx) {
-    return list_gate[idx].out.wire_name;
-}
-
-vector<string> Graph::get_gate_inputs(string gate_name) {
-    vector<string> inputs;
-
-    int gate_idx = get_gate_idx(gate_name);
-    
-    vector<int> in_list = get_gate_inputs_from_in(gate_idx);
-    for (int i = 0; i < in_list.size(); i++)
-        inputs.push_back(list_input[in_list[i]].wire_name);
-    
-    in_list = get_gate_inputs_from_gate(gate_idx);
-    for (int i = 0; i < in_list.size(); i++)
-        inputs.push_back(list_gate[in_list[i]].out.wire_name);
-
-    return inputs;
-}
-
 void Graph::add_Input(string in_name) {
-    Wire new_input;
-    new_input.wire_name = in_name;
-    new_input.nxt_gate.resize(0);
-    list_input.push_back(new_input);
+    Gate new_input;
+    new_input.operation = -1;
+    new_input.out.wire_name = in_name;
+    new_input.out.nxt_gate.resize(0);
+    new_input.out.arr_time = 0;
+    new_input.out.req_time = 0;
+    new_input.out.slack = new_input.out.req_time - new_input.out.arr_time;
+    list_gate.push_back(new_input);
+    no_node++;
 }
 
 void Graph::add_Output(string out_name) {
@@ -86,97 +52,77 @@ void Graph::add_Output(string out_name) {
     new_gate.out.wire_name = out_name;
     new_gate.out.nxt_gate.resize(0);  
     list_gate.push_back(new_gate);
-    no_gate++;
+    no_node++;
 }
 
 void Graph::add_Gate(vector<string> in_name, string out_name, int op) {
     //1st: Check if exist gate with same output or ifnot then create Gate with the init parameter
-    int gate_idx = get_gate_idx(out_name);
+    int gate_idx = get_wire_idx(out_name);
     if (gate_idx == -1) {
         Gate new_gate;
         new_gate.out.wire_name = out_name;
         new_gate.operation = op; 
         new_gate.out.nxt_gate.resize(0);
         list_gate.push_back(new_gate);
-        gate_idx = no_gate;
-        no_gate++;
+        gate_idx = no_node;
+        no_node++;
     }
-    else {
+    else 
         list_gate[gate_idx].operation = op;     //for case gate is output 
-    }
 
     //2nd: Add connection to the new gate to previous inputs/gates
     for (int i = 0; i < in_name.size(); i++) {
-        int idx = get_gate_idx(in_name[i]);
-        if (idx == -1) {
-            idx = get_input_idx(in_name[i]);
-            list_input[idx].nxt_gate.push_back(gate_idx);
-        } else
-            list_gate[idx].out.nxt_gate.push_back(gate_idx);
+        int idx = get_wire_idx(in_name[i]);
+        list_gate[idx].out.nxt_gate.push_back(gate_idx);
     }
 }
 
 void Graph::add_Inv(string in_name, string out_name) {
-    int gate_idx = get_gate_idx(out_name);
+    int gate_idx = get_wire_idx(out_name);
     if (gate_idx == -1) {
         Gate new_gate;
         new_gate.out.wire_name = out_name;
-        new_gate.operation = -1;
+        new_gate.operation = 2;
         new_gate.out.nxt_gate.resize(0);
         list_gate.push_back(new_gate);
-        gate_idx = no_gate;
-        no_gate++;
+        gate_idx = no_node;
+        no_node++;
     }
     else {
-        list_gate[gate_idx].operation = -1;
+        list_gate[gate_idx].operation = 2;
     }
 
-    int idx = get_gate_idx(in_name);
-    if (idx == -1) {
-        idx = get_input_idx(in_name);
-        list_input[idx].nxt_gate.push_back(gate_idx);
-    } else
-        list_gate[idx].out.nxt_gate.push_back(gate_idx);
+    int idx = get_wire_idx(in_name);
+    list_gate[idx].out.nxt_gate.push_back(gate_idx);
 }
 
-vector<int> Graph::get_successor_gate(string output_name) {
+vector<int> Graph::get_successor_gate(int gate_idx) {
     vector<int> successor;
-    //1st: Check index of the gate with coressponding name
-    int gate_idx = get_gate_idx(output_name);
-    //2nd: Check if exists gate ?
-    if (gate_idx != -1) {
-    //3rd: If exist gate then push_back gate.ouput_name to the successor list
-        for (int i = 0; i < list_gate[gate_idx].out.nxt_gate.size(); i++) 
-            successor.push_back(list_gate[gate_idx].out.nxt_gate[i]);
+    for (int i = 0; i < list_gate[gate_idx].out.nxt_gate.size(); i++) {
+        successor.push_back(list_gate[gate_idx].out.nxt_gate[i]);
     }
     return successor;
 }
 
-vector<int> Graph::get_predecessor_gate(string output_name) {
+vector<int> Graph::get_predecessor_gate(int gate_idx) {
     vector<int> precessor;
-    //1st: Check index of the gate with coressponding name
-    int gate_idx = get_gate_idx(output_name);
-    
-    if (gate_idx != -1) {
-    //2rd: If exist gate then travel along the gate list to check the nxt_gate list of the gate then push_back to precessor
-        for (int i = 0; i < no_gate; i++) {
-            if (i == gate_idx)
-                continue;
-            else {
-                for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
-                    int check_idx = list_gate[i].out.nxt_gate[j];
-                    if (check_idx == gate_idx)
-                        precessor.push_back(i);
-                }
+    for (int i = 0; i < no_node; i++) {
+        if (list_gate[i].operation == -1) continue;
+        if (i == gate_idx) continue;
+        else {
+            for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
+                int check_idx = list_gate[i].out.nxt_gate[j];
+                if (check_idx == gate_idx)
+                    precessor.push_back(i);
             }
-        }   
+        }
     }
     return precessor;
 }
 
 vector<int> Graph::get_circuit_outputs() {
     vector<int> outputs;
-    for (int i = 0; i < no_gate; i++) {
+    for (int i = 0; i < no_node; i++) {
         if (list_gate[i].out.nxt_gate.size() == 0) {
             outputs.push_back(i);
         }
@@ -184,54 +130,221 @@ vector<int> Graph::get_circuit_outputs() {
     return outputs;
 }
 
-void Graph::print_Gate(int idx) {
-    cout << "----------" << endl;
-    cout << "Gate: " << list_gate[idx].out.wire_name << endl;
-    cout << "Input: ";
-    for (int i = 0; i < list_gate[idx].out.nxt_gate.size(); i++) {
-        cout << list_gate[idx].out.nxt_gate[i] << " ";
-    }
-    cout << endl << "----------" << endl;
-}
-
-// void Graph::print_Input(int idx) {
-//     cout << "----------" << endl;
-//     cout << "Name: " << list_input[idx].wire_name << endl;
-//     cout << "Nxt_gate: ";
-//     for (int i = 0; i < list_input[idx].nxt_gate.size(); i++) {
-//         cout << list_input[idx].nxt_gate[i] << " ";
-//     }
-//     cout << endl;
-// }
-
 void Graph::print_Graph() {
     cout << "--------------------" << endl;
     cout << "Module name: " << module_name << endl;
-    cout << "Number of Gate: " << no_gate << endl;
     cout << "Input: ";
-    for (int i = 0; i < list_input.size(); i++)
-        cout << list_input[i].wire_name << " ";
+    for (int i = 0; i < no_node; i++)
+        if (list_gate[i].operation == -1)
+            cout << list_gate[i].out.wire_name << " ";
     cout << endl;
-    
+
+    vector<int> outputs = get_circuit_outputs();
+    cout << "Input: ";
+    for (int i = 0; i < outputs.size(); i++)
+        cout << get_wire_name(outputs[i]) << " ";
+    cout << endl;
+
     cout << "Gate:" << endl;
-    
-    for (int i = 0; i < no_gate; i++) {
-        cout << i << ".\t" <<  list_gate[i].out.wire_name << "=" ;
+    for (int i = 0; i < no_node; i++) {
+        if (list_gate[i].operation != -1) {
+            cout <<  list_gate[i].out.wire_name << "=" ;
+            
+            int op_code = list_gate[i].operation;
+            string op_code_s;
+            if (op_code == 2)
+                op_code_s = "'";
+            else if (op_code == 0)
+                op_code_s = "."; 
+            else if (op_code == 1)
+                op_code_s = "+";
+            else
+                op_code_s = "";
 
-        int op_code = list_gate[i].operation;
-        string op_code_s;
-        if (op_code == -1)
-            op_code_s = "\'";
-        else if (op_code == 0)
-            op_code_s = "."; 
-        else
-            op_code_s = "+";
-
-        vector<string> inputs = get_gate_inputs(list_gate[i].out.wire_name);     
-        for (int j = 0; j < inputs.size()-1; j++)
-            cout << inputs[j] << op_code_s;
-        cout << inputs.back() << endl;
+            vector<int> inputs = get_gate_inputs(get_wire_idx(list_gate[i].out.wire_name));     
+            for (int j = 0; j < inputs.size()-1; j++)
+                cout << get_wire_name(inputs[j]) << op_code_s;
+            cout << get_wire_name(inputs.back());
+            if (inputs.size() == 1) cout << op_code_s;
+            cout << endl;
+        }
     }
 
     cout << "--------------------" << endl;
+}
+
+void Graph::topology_sort_util(int v, bool visited[], stack<int>& Stack) {
+    visited[v] = true;
+
+    vector<int>::iterator i;
+    for (i = list_gate[v].out.nxt_gate.begin(); i != list_gate[v].out.nxt_gate.end(); i++)
+        if (!visited[*i])
+            topology_sort_util(*i, visited, Stack);
+    
+    Stack.push(v);
+}
+
+void Graph::topology_sort() {
+    stack<int> Stack;
+    bool* visited = new bool[no_node];
+
+    for (int i = 0; i < no_node; i++)
+        visited[i] = false;
+
+    for (int i = 0; i < no_node; i++)
+        if (visited[i] == false)
+            topology_sort_util(i, visited, Stack);
+
+    while (Stack.empty() == false) {
+        sorted_gate_list.push_back(Stack.top());
+        Stack.pop();
+    }
+
+    for (int i = 0; i < sorted_gate_list.size(); i++) {
+        cout << get_wire_name(sorted_gate_list[i]) << " ";
+    }
+    cout << endl;
+    
+    delete [] visited;
+}
+
+void Graph::read_blif_file(string dir_path) {
+    ifstream 	blif_file(dir_path);
+	int 		mode = 0;						//-2: read comment, -1: read module name, 0: read normal, 1: parse input, 2: parse output, 3: parse function
+	bool		func_flag = 0;					//0: parse variables, 1: parse operation
+	string 		temp;							//Store word from file waiting for process
+	vector<string> temp_func;
+	vector<string> vari_list;
+
+	
+	while(1) {
+		blif_file >> temp;
+
+		if (temp[0] == '#') {					//check if we get the comment part
+			getline(blif_file, temp);
+			continue;
+		}
+		else if (temp == ".model")	{			//get module name
+			if (blif_file.peek() != '\n')
+				blif_file >> module_name;
+			else
+				module_name = dir_path;
+				setModuleName(module_name);
+			continue;
+		}
+		else if (temp == ".inputs") {
+			mode = 1;
+			continue;
+		}
+		else if (temp == ".outputs") {
+			mode = 2;
+			continue;
+		}
+		else if (temp == ".names") {
+			mode = 3;
+			if(func_flag) {											//Check if ther's still previous equation then add it to the data structure
+				if (temp_func.size() == 1) {		
+					if (vari_list.size() == 2)
+						add_Inv(vari_list[0], vari_list[1]);
+					else {
+						for (int i = 0; i < vari_list.size()-1; i++) {		//Ignore output variable
+							if(temp_func[0][i] == '0') {
+								string out_name = vari_list[i] + "\'";
+								add_Inv(vari_list[i], out_name);
+								vari_list[i] = out_name;
+							}
+						}
+						string out_name = vari_list.back();
+						vari_list.pop_back();
+						add_Gate(vari_list, out_name, 0);
+					}
+				}
+				else {
+					for (int i = 0; i < temp_func.size(); i++) {
+						for (int j = 0; j < vari_list.size()-1; j++) {
+							if (temp_func[i][j] == '0') {
+								string out_name = vari_list[i] + "\'";
+								add_Inv(vari_list[i], out_name);
+								vari_list[i] = out_name;
+							}	
+						}
+					}
+					string out_name = vari_list.back();
+					vari_list.pop_back();
+					add_Gate(vari_list, out_name, 1);
+				}
+			}
+
+			func_flag = 0;
+			vari_list.clear();
+			temp_func.clear();
+			continue;
+		}
+		else if(temp == ".end") {
+			if(func_flag) {											//Check if ther's still previous equation then add it to the data structure
+				if (temp_func.size() == 1) {		
+					if (vari_list.size() == 2)
+						add_Inv(vari_list[0], vari_list[1]);
+					else {
+						for (int i = 0; i < vari_list.size()-1; i++) {		//Ignore output variable
+							if(temp_func[0][i] == '0') {
+								string out_name = vari_list[i] + "\'";
+								add_Inv(vari_list[i], out_name);
+								vari_list[i] = out_name;
+							}
+						}
+						string out_name = vari_list.back();
+						vari_list.pop_back();
+						add_Gate(vari_list, out_name, 0);
+					}
+				}
+				else {
+					for (int i = 0; i < temp_func.size(); i++) {
+						for (int j = 0; j < vari_list.size()-1; j++) {
+							if (temp_func[i][j] == '0') {
+								string out_name = vari_list[i] + "\'";
+								add_Inv(vari_list[i], out_name);
+								vari_list[i] = out_name;
+							}	
+						}
+					}
+					string out_name = vari_list.back();
+					vari_list.pop_back();
+					add_Gate(vari_list, out_name, 1);
+				}
+			}
+			break;
+		}
+		
+		if (mode == 1) {
+			if (temp == "\\")
+				continue;
+			else
+				add_Input(temp);
+		}
+		else if (mode == 2) {
+			if (temp == "\\")
+				continue;
+			else
+				add_Output(temp);
+		}
+		else if (mode == 3) {
+			if (!func_flag) {													//1st time, code read the variables, if meet the \ continure, if meet 
+				if (temp == "\\") {
+					continue;
+				} else {
+					vari_list.push_back(temp);
+					if ((blif_file.peek() == '\n'))
+						func_flag = 1;
+				}
+			}
+			else {
+				temp_func.push_back(temp);
+				blif_file >> temp;
+			}
+		}
+	}
+	blif_file.close();
+	cout << "Done reading file" << endl;
+    topology_sort();
 }

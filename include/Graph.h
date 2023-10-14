@@ -2,14 +2,16 @@
 #define GRAPH_H
 
 #include <string>
+#include <stack>
 #include <vector>
-#include <queue>
 #include <iostream>
-#include <algorithm>
+#include <sstream>
+#include <fstream>
 
 using namespace std;
 
 class Graph{
+protected:
     struct Wire {
         string          wire_name;
         int             req_time, arr_time, slack = 0;
@@ -17,28 +19,30 @@ class Graph{
     };
 
     struct  Gate {
-        int             operation;                //-1: Not, 0: AND, 1: OR
+        int             operation;              //-1: Input, 0:AND, 1:OR, 2:Not
         int             delay = 1;
         Wire            out;
+        int             step = 0;                   //0: unscheduled, > 0 schedule at step ...
     };
-    
-    private:
-        string module_name;
-        vector<Gate> list_gate;
-        vector<Wire> list_input;
-        int no_gate;
-    public:
+
+    bool debug = 1;
+    string module_name;
+    vector<Gate> list_gate;
+    vector<int> sorted_gate_list;
+
+    int no_node;
+    void topology_sort_util(int, bool[], stack<int>&);
+
+public:
         Graph();
         ~Graph();
         void setModuleName(string);
         string getModuleName();
 
-        int get_gate_idx(string);
-        string get_gate_name(int);
-        int get_input_idx(string);
-        vector<int> get_gate_inputs_from_gate(int);
-        vector<int> get_gate_inputs_from_in(int);
-        vector<string> get_gate_inputs(string);
+        string get_wire_name(int);
+        int get_wire_idx(string);
+
+        vector<int> get_gate_inputs(int);
         
         void add_Input(string);
         void add_Output(string);
@@ -46,14 +50,15 @@ class Graph{
         void add_Gate(vector<string>, string, int);
         void add_Inv(string, string);               //Get index of input in list of inputs
         
-        vector<int> get_successor_gate(string);
-        vector<int> get_predecessor_gate(string);
+        vector<int> get_successor_gate(int);
+        vector<int> get_predecessor_gate(int);
         vector<int> get_circuit_outputs();
 
-        // void print_Input(int);
         void print_Gate(int);
         void print_Graph();
 
+        void read_blif_file(string);        //done
+        void topology_sort();               //done
 };
 
 #endif

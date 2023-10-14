@@ -2,33 +2,38 @@
 #define SCHEDULING_H
 
 #include "./Graph.h"
+#include <stack>
 
 class Scheduling : public Graph {
-private:
+protected:
+    bool    debug = 1;
     int AND_CONST   = 0;
     int OR_CONST    = 0;
     int NOT_CONST   = 0;
 
-    vector<string> schedule;
-    vector<int> list_inputs;
-    vector<int> list_outputs;
+    void check_resource_available(vector<int>&, int);
+    vector<vector<int>> schedule;
+
 public:
     Scheduling();
     ~Scheduling();
-    void set_AND_CONST(int);
-    void set_OR_CONST(int);
-    void set_INV_CONST(int);
-    int get_AND_CONST();
-    int get_OR_CONST();
-    int GET_NOT_CONST();
 
-    void update_wire_slack(int);
-    void update_gate_arr_time(int);
-    void update_gate_req_time(int);
-    bool check_predecessor_scheduled(vector<int>, int);
-    void alap();
-    void asap();
-    void list_scheduling();
+    void set_AND_CONST(int AND_CONST) { this->AND_CONST = AND_CONST; }
+    void set_OR_CONST(int OR_CONST) { this->OR_CONST = OR_CONST; }
+    void set_NOT_CONST(int NOT_CONST) { this->NOT_CONST = NOT_CONST; }
+
+    int get_AND_CONST() { return AND_CONST; }
+    int get_OR_CONST() { return OR_CONST; }
+    int get_NOT_CONST() { return NOT_CONST; }
+
+    void reset_schedule();
+
+    bool check_predecessor_scheduled(int);      //undone
+
+    void cal_alap();
+    void cal_asap();
+    void cal_slack();
+    void list_scheduling(int, int, int);
     void print_Schedule();
 };
 
