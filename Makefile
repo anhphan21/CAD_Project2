@@ -10,7 +10,7 @@ LIBS		= ./include
 #${CXX} ${CXXLAGS} ${LIBS}/Graph.cpp ${LIBS}/Scheduling.cpp main.cpp -o out.o
 
 main:
-	${CXX} ${CXXLAGS} ${LIBS}/Graph.cpp main.cpp -o out.o
+	${CXX} ${CXXLAGS} ${LIBS}/Scheduling.cpp ${LIBS}/Graph.cpp main.cpp -o out.o
 test:
 	${CXX} ${CXXLAGS} ./include/Graph.h ./include/Graph.cpp test.cpp -o test.o
 

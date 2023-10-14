@@ -6,7 +6,7 @@
 
 class Scheduling : public Graph {
 protected:
-    bool    debug = 1;
+    bool    debug   = 0;
     int AND_CONST   = 0;
     int OR_CONST    = 0;
     int NOT_CONST   = 0;
@@ -27,8 +27,11 @@ public:
     int get_NOT_CONST() { return NOT_CONST; }
 
     void reset_schedule();
+    vector<vector<int>> get_schedule() { return schedule; }
 
-    bool check_predecessor_scheduled(int);      //undone
+    // bool check_predecessor_scheduled(int, vector<int>);      //done
+    vector<int> get_gate_only();
+    void remove_scheduled_gate(vector<int>&);
 
     void cal_alap();
     void cal_asap();

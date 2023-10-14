@@ -3,10 +3,11 @@
 Graph::Graph() {
     list_gate.resize(0);
     no_node = 0;
+    no_input = 0;
 }
 
 Graph::~Graph() {
-    list_gate.empty();
+    list_gate.clear();
 }
 
 void Graph::setModuleName(string name)  { module_name = name; }
@@ -45,6 +46,7 @@ void Graph::add_Input(string in_name) {
     new_input.out.slack = new_input.out.req_time - new_input.out.arr_time;
     list_gate.push_back(new_input);
     no_node++;
+    no_input++;
 }
 
 void Graph::add_Output(string out_name) {
@@ -148,7 +150,7 @@ void Graph::print_Graph() {
     cout << "Gate:" << endl;
     for (int i = 0; i < no_node; i++) {
         if (list_gate[i].operation != -1) {
-            cout <<  list_gate[i].out.wire_name << "=" ;
+            cout << i << ". " << list_gate[i].out.wire_name << "=" ;
             
             int op_code = list_gate[i].operation;
             string op_code_s;
@@ -169,7 +171,6 @@ void Graph::print_Graph() {
             cout << endl;
         }
     }
-
     cout << "--------------------" << endl;
 }
 

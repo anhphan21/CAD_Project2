@@ -19,18 +19,18 @@ protected:
     };
 
     struct  Gate {
-        int             operation;              //-1: Input, 0:AND, 1:OR, 2:Not
+        int             operation;                  //-1: Input, 0:AND, 1:OR, 2:Not
         int             delay = 1;
         Wire            out;
         int             step = 0;                   //0: unscheduled, > 0 schedule at step ...
     };
 
-    bool debug = 1;
     string module_name;
     vector<Gate> list_gate;
     vector<int> sorted_gate_list;
-
     int no_node;
+    int no_input;
+
     void topology_sort_util(int, bool[], stack<int>&);
 
 public:
