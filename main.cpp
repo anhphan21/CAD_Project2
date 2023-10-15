@@ -32,6 +32,8 @@ int main(int argc, char* argv[]) {
 
 	circuit.list_scheduling(stoi(argv[2]), stoi(argv[3]), stoi(argv[4]));
 	circuit.print_Schedule();
+	circuit.asap_scheduling();
+	circuit.print_Schedule();
 
 	return 0;
 }

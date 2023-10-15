@@ -122,6 +122,21 @@ vector<int> Graph::get_predecessor_gate(int gate_idx) {
     return precessor;
 }
 
+vector<int> Graph::get_predecessor_gate_n_input(int gate_idx) {
+    vector<int> precessor;
+    for (int i = 0; i < no_node; i++) {
+        if (i == gate_idx) continue;
+        else {
+            for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
+                int check_idx = list_gate[i].out.nxt_gate[j];
+                if (check_idx == gate_idx)
+                    precessor.push_back(i);
+            }
+        }
+    }
+    return precessor;
+}
+
 vector<int> Graph::get_circuit_outputs() {
     vector<int> outputs;
     for (int i = 0; i < no_node; i++) {

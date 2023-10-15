@@ -15,69 +15,71 @@ void Scheduling::reset_schedule() {
     schedule.clear();
 }
 
-void Scheduling::cal_alap() {
-    // for (int i = 0; i < sorted_gate_list.size(); i++) {
-    //     vector<int> req;
-    //     vector<int> check_list = get_gate_inputs_from_in(sorted_gate_list[i]);
-        
-    //     for (int j = 0; j < check_list.size(); j++)
-    //         req.push_back(list_input[check_list[j]].req_time);
+void Scheduling::alap_scheduling(int max_latency) {
 
-    //     check_list = get_gate_inputs_from_gate(sorted_gate_list[i]);
-    //     for (int j = 0; j < check_list.size(); j++)
-    //         req.push_back(list_gate[check_list[j]].out.req_time);
-
-    //     int max = req[0];
-    //     for (int j = 1; j < req.size(); j++)
-    //         if (req[j] > max)
-    //             max = req[j];
-        
-    //     list_gate[sorted_gate_list[i]].out.req_time = max + list_gate[sorted_gate_list[i]].delay;
-    // }
-    
-    // cout << "---------------" << endl;
-    // for (int i = 0; i < no_gate; i++) {
-    //     cout << sorted_gate_list[i] << ". " << list_gate[sorted_gate_list[i]].out.req_time << endl;
-    // }
-    // cout << "---------------" << endl;
 }
 
-void Scheduling::cal_asap() {
-//     for (int i = 0; i < sorted_gate_list.size(); i++) {
-//         vector<int> arr;
-//         vector<int> check_list = get_gate_inputs_from_in(sorted_gate_list[i]);
+void Scheduling::asap_scheduling() {
+    schedule.clear();
+    reset_schedule();
+    int no_gate = no_node - no_input;
+    int step = 0;
+    int no_scheduled_gate = 0;                         //check for end of schedule    
+    vector<int> sche_this_step;                        //temp_var to push to schedule vector
+    vector<int> not_scheduled_list = get_gate_only();
+    vector<int> rdy;
+
+    while (no_scheduled_gate < no_gate) {
+        sche_this_step.clear();
+        step++;
+        //Select vi with all scheduled predecessors
+        for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+            vector<int> pre_check = get_predecessor_gate(*i);
+            int j = 0;
+            for (j = 0; j < pre_check.size(); j++) {
+                if (list_gate[pre_check[j]].step != 0)
+                    continue;
+                else
+                    break;
+            }
+
+            if (j == pre_check.size()) {
+                rdy.push_back(*i);
+                i = not_scheduled_list.erase(i);
+            }
+            else
+                i++;
+        }
+
+        //Schedule vi
+        for (auto i = rdy.begin(); i != rdy.end();) {
+            vector<int> pre_check = get_predecessor_gate_n_input(*i);
+            
+            int max = list_gate[pre_check[0]].step;
+            for (int j = 1; j < pre_check.size(); j++) {
+                if (list_gate[j].step > max)
+                    max = list_gate[pre_check[j]].step;
+            }
+
+            list_gate[*i].step = max + list_gate[*i].delay;
+
+            sche_this_step.push_back(*i);
+            cout << "Schedule gate " << get_wire_name(*i) << " at " << step << endl;
+            i = rdy.erase(i);
+            no_scheduled_gate++;
+            
+        }
+
+        //Update gate list
+        for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+            if (list_gate[*i].step != 0)
+                i = not_scheduled_list.erase(i);
+            else
+                i++;
+        }
         
-//         for (int j = 0; j < check_list.size(); j++)
-//             arr.push_back(list_input[check_list[j]].arr_time);
-
-//         check_list = get_gate_inputs_from_gate(sorted_gate_list[i]);
-//         for (int j = 0; j < check_list.size(); j++)
-//             arr.push_back(list_gate[check_list[j]].out.arr_time);
-
-//         int max = arr[0];
-//         for (int j = 1; j < arr.size(); j++)
-//             if (arr[j] > max)
-//                 max = arr[j];
-        
-//         list_gate[sorted_gate_list[i]].out.arr_time = max + list_gate[sorted_gate_list[i]].delay;
-//     }
-    
-//     cout << "---------------" << endl;
-//     for (int i = 0; i < no_gate; i++) {
-//         cout << sorted_gate_list[i] << ". " << list_gate[sorted_gate_list[i]].out.arr_time << endl;
-//     }
-//     cout << "---------------" << endl;
-// }
-
-// void Scheduling::cal_slack() {
-//     for (int i = 0; i < no_gate; i++)
-//         list_gate[i].out.slack = list_gate[i].out.req_time - list_gate[i].out.arr_time;
-
-//     cout << "---------------" << endl;
-//     for (int i = 0; i < no_gate; i++) {
-//         cout << sorted_gate_list[i] << ". " << list_gate[sorted_gate_list[i]].out.slack << endl;
-//     }
-//     cout << "---------------" << endl;
+        schedule.push_back(sche_this_step);
+    }
 }
 
 void Scheduling::check_resource_available(vector<int> &vec, int step) {
@@ -88,15 +90,6 @@ void Scheduling::check_resource_available(vector<int> &vec, int step) {
             i++;
     }
 }
-
-// bool Scheduling::check_predecessor_scheduled(int gate_idx, vector<int> not_scheduled) {
-//     for (int i = 0; i < list_gate[gate_idx].out.nxt_gate.size(); i++) {
-//         for (int j = 0; j < not_scheduled.size(); j++)
-//             if (list_gate[gate_idx].out.nxt_gate[i] == not_scheduled[j])
-//                 return 0;        
-//     }
-//     return 1;
-// }
 
 vector<int> Scheduling::get_gate_only() {
     vector<int> not_scheduled;
@@ -113,7 +106,7 @@ void Scheduling::remove_scheduled_gate(vector<int> &gate_list) {
                 i = gate_list.erase(i);
             else
                 i++;
-        }
+    }
 }
 
 void Scheduling::list_scheduling(int and_c, int or_c, int not_c) {
@@ -216,20 +209,27 @@ void Scheduling::print_Schedule() {
     vector<int> or_rsc;
     cout <<  "------ Schedule ------" << endl;
     cout << "\t<And>\t<OR>\t<NOT>" << endl;
+
     for (int i = 0; i < schedule.size(); i++) {
         and_rsc.clear();
         not_rsc.clear();
         or_rsc.clear();
 
         for (int j = 0; j < schedule[i].size(); j++) {
-            if (list_gate[schedule[i][j]].operation == 0)
+            if (list_gate[schedule[i][j]].operation == 0) {
                 and_rsc.push_back(schedule[i][j]);
-            else if (list_gate[schedule[i][j]].operation == 1)
+            } 
+            else if (list_gate[schedule[i][j]].operation == 1) {
                 or_rsc.push_back(schedule[i][j]);
-            else if (list_gate[schedule[i][j]].operation == 2)
+            }
+            else if (list_gate[schedule[i][j]].operation == 2) {
                 not_rsc.push_back(schedule[i][j]);
+            }
+            else
+                continue;
         }
-        
+
+
         cout << "Step " << i+1 << ":\t";
         cout << "{";
         for (int j = 0; j < and_rsc.size(); j++)
@@ -239,9 +239,11 @@ void Scheduling::print_Schedule() {
             cout << " " << get_wire_name(or_rsc[j]);
         cout << " }\t{";
         for (int j = 0; j < not_rsc.size(); j++)
-            cout << " " << get_wire_name(or_rsc[j]);
+            cout << " " << get_wire_name(not_rsc[j]);
         cout << " }" << endl;
     }
-    cout << "Latency: " << schedule.size()+1 << endl;
-    cout << "End" << endl;    
+    
+    cout << "Latency: " << schedule.size() << endl;
+    cout << "End" << endl;
+    cout <<  "----------------------" << endl;
 }
