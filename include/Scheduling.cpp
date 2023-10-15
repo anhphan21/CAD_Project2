@@ -16,7 +16,87 @@ void Scheduling::reset_schedule() {
 }
 
 void Scheduling::alap_scheduling(int max_latency) {
+    schedule.clear();
+    reset_schedule();
+    int no_gate = no_node - no_input;
+    int step = max_latency;
+    int no_scheduled_gate = 0;
+    vector<int> sche_this_step;                         //temp_var to push to schedule vector
+    vector<int> not_scheduled_list = get_gate_only();
+    vector<int> rdy;
+    stack<vector<int>>  reverse_schedule;
 
+    // remove output from not_scheduled_list
+    for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+        
+        if (list_gate[*i].out.nxt_gate.size() == 0) {
+            list_gate[*i].step = step;
+            no_scheduled_gate++;
+            sche_this_step.push_back(*i);
+            i = not_scheduled_list.erase(i);
+        }
+        else
+            i++;
+    }
+    reverse_schedule.push(sche_this_step);
+
+    if (debug) {
+    cout << "rdy list before scheduling:";
+    for (int i = 0; i < rdy.size(); i++)
+        cout << " " << list_gate[rdy[i]].out.wire_name;
+    cout << endl;
+    
+    cout << "not_schdedule list before scheduling:";
+    for (int i = 0; i < not_scheduled_list.size(); i++)
+        cout << " " << list_gate[not_scheduled_list[i]].out.wire_name;
+    cout << endl;
+    }
+
+    while (no_scheduled_gate < no_gate) {
+        sche_this_step.clear();
+        step--;
+        //Select vi with all scheduled successors
+        for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+            vector<int> suc_check = get_successor_gate(*i);
+            int j = 0;
+            for (j = 0; j < suc_check.size(); j++) {
+                if (list_gate[suc_check[j]].step != 0)
+                    continue;
+                else
+                    break;
+            }
+            if (j == suc_check.size()) {
+                rdy.push_back(*i);
+                i = not_scheduled_list.erase(i);
+            }
+            else
+                i++;
+        }
+        //Schedule vi
+        for (auto i = rdy.begin(); i != rdy.end();) {
+            vector<int> suc_check = get_successor_gate(*i);
+            
+            int min = list_gate[suc_check[0]].step;
+            for (int j = 1; j < suc_check.size(); j++) {
+                if (list_gate[j].step < min)
+                    min = list_gate[suc_check[j]].step;
+            }
+
+            list_gate[*i].step = min - list_gate[*i].delay;
+
+            sche_this_step.push_back(*i);
+            cout << "Schedule gate " << get_wire_name(*i) << " at " << step << endl;
+            i = rdy.erase(i);
+            no_scheduled_gate++;
+        }
+
+        reverse_schedule.push(sche_this_step);
+    }
+
+    while (!reverse_schedule.empty()) {
+        schedule.push_back(reverse_schedule.top());
+        reverse_schedule.pop();
+    }
 }
 
 void Scheduling::asap_scheduling() {
@@ -64,7 +144,7 @@ void Scheduling::asap_scheduling() {
             list_gate[*i].step = max + list_gate[*i].delay;
 
             sche_this_step.push_back(*i);
-            cout << "Schedule gate " << get_wire_name(*i) << " at " << step << endl;
+            // cout << "Schedule gate " << get_wire_name(*i) << " at " << step << endl;
             i = rdy.erase(i);
             no_scheduled_gate++;
             
