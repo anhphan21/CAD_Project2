@@ -171,6 +171,7 @@ void Scheduling::remove_scheduled_gate(vector<int> &gate_list) {
             else
                 i++;
     }
+    }
 }
 
 void Scheduling::list_scheduling(int and_c, int or_c, int not_c) {
@@ -273,6 +274,7 @@ void Scheduling::print_Schedule() {
     cout <<  "------ Schedule ------" << endl;
     cout << "\t<And>\t<OR>\t<NOT>" << endl;
 
+
     for (int i = 0; i < schedule.size(); i++) {
         and_rsc.clear();
         not_rsc.clear();
@@ -280,17 +282,27 @@ void Scheduling::print_Schedule() {
 
         for (int j = 0; j < schedule[i].size(); j++) {
             if (list_gate[schedule[i][j]].operation == 0) {
+            if (list_gate[schedule[i][j]].operation == 0) {
                 and_rsc.push_back(schedule[i][j]);
             } 
             else if (list_gate[schedule[i][j]].operation == 1) {
+            } 
+            else if (list_gate[schedule[i][j]].operation == 1) {
                 or_rsc.push_back(schedule[i][j]);
+            }
+            else if (list_gate[schedule[i][j]].operation == 2) {
             }
             else if (list_gate[schedule[i][j]].operation == 2) {
                 not_rsc.push_back(schedule[i][j]);
             }
             else
                 continue;
+            }
+            else
+                continue;
         }
+
+
 
 
         cout << "Step " << i+1 << ":\t";
@@ -302,6 +314,7 @@ void Scheduling::print_Schedule() {
             cout << " " << get_wire_name(or_rsc[j]);
         cout << " }\t{";
         for (int j = 0; j < not_rsc.size(); j++)
+            cout << " " << get_wire_name(not_rsc[j]);
             cout << " " << get_wire_name(not_rsc[j]);
         cout << " }" << endl;
     }
