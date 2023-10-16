@@ -502,7 +502,7 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     }
 
     //Export ILP file
-    string output_file_name = getModuleName() + "_ilp.in";
+    string output_file_name = getModuleName() + ".lp";
     ofstream output_file(output_file_name);
     output_file << "Minimize" << endl;
     output_file << " obj: " << objective << endl;
@@ -534,4 +534,47 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
             output_file << " " << binary_var[i][j] << endl;
     output_file << "End" << endl;
     output_file.close();
+
+    string cmd = "gurobi_cl ResultFile=" + getModuleName() + ".sol " + getModuleName() + ".lp";
+    cout << cmd << endl;
+    const char * c = cmd.c_str();
+    system(c);
+    schedule = read_sol_file(min_step);
+}
+
+vector<vector<int>> Scheduling::read_sol_file(int step) {
+    string sol_file_name = getModuleName() + ".sol";
+    ifstream sol_file(sol_file_name);
+    string temp;
+    vector<vector<int>> schedule_temp(step);
+
+    while (sol_file) {
+        sol_file >> temp;
+        if (temp[0] == '#') {					//check if we get the comment part
+			getline(sol_file, temp);
+			continue;
+		}
+        else {
+            string _schedule;
+            sol_file >> _schedule;
+            if (_schedule == "1") {
+                temp.erase(temp.begin());
+                temp.erase(temp.begin());
+                auto i = temp.begin();
+                string part;
+                while (*i != '_') {
+                    part.push_back(*i);
+                    i = temp.erase(i);
+                }
+                temp.erase(temp.begin());
+                int step = stoi(temp);
+                int idx = stoi(part);
+                schedule_temp[step-1].push_back(idx);
+                cout << get_wire_name(idx) <<  " _ " << step << endl;
+            }
+            else
+                continue;
+        }
+    }
+    return schedule_temp;
 }

@@ -37,6 +37,8 @@ int main(int argc, char* argv[]) {
 	// circuit.alap_scheduling(4);
 	// circuit.print_Schedule();
 	circuit.ilp_scheduling(stoi(argv[2]), stoi(argv[3]), stoi(argv[4]));
+	circuit.print_Schedule();
+	// circuit.read_sol_file();
 
 	return 0;
 }

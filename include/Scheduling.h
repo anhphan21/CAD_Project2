@@ -4,6 +4,7 @@
 #include "./Graph.h"
 #include <algorithm>
 #include <stack>
+#include <cstring>
 
 class Scheduling : public Graph {
 protected:
@@ -32,6 +33,7 @@ public:
 
     vector<int> get_gate_only();
     void remove_scheduled_gate(vector<int>&);
+    vector<vector<int>> read_sol_file(int);
 
     void alap_scheduling(int);
     void asap_scheduling();
