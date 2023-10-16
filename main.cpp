@@ -30,8 +30,13 @@ int main(int argc, char* argv[]) {
 	// 	cout << circuit.get_wire_name(out_check[i]) << " ";
 	// cout << endl;
 
-	circuit.list_scheduling(stoi(argv[2]), stoi(argv[3]), stoi(argv[4]));
-	circuit.print_Schedule();
+	// circuit.list_scheduling(stoi(argv[2]), stoi(argv[3]), stoi(argv[4]));
+	// circuit.print_Schedule();
+	// circuit.asap_scheduling();
+	// circuit.print_Schedule();
+	// circuit.alap_scheduling(4);
+	// circuit.print_Schedule();
+	circuit.ilp_scheduling(stoi(argv[2]), stoi(argv[3]), stoi(argv[4]));
 
 	return 0;
 }

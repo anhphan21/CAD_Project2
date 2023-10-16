@@ -2,6 +2,7 @@
 #define SCHEDULING_H
 
 #include "./Graph.h"
+#include <algorithm>
 #include <stack>
 
 class Scheduling : public Graph {
@@ -29,14 +30,13 @@ public:
     void reset_schedule();
     vector<vector<int>> get_schedule() { return schedule; }
 
-    // bool check_predecessor_scheduled(int, vector<int>);      //done
     vector<int> get_gate_only();
     void remove_scheduled_gate(vector<int>&);
 
-    void cal_alap();
-    void cal_asap();
-    void cal_slack();
+    void alap_scheduling(int);
+    void asap_scheduling();
     void list_scheduling(int, int, int);
+    void ilp_scheduling(int, int, int);
     void print_Schedule();
 };
 

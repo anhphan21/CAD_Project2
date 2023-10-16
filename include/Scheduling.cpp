@@ -15,69 +15,135 @@ void Scheduling::reset_schedule() {
     schedule.clear();
 }
 
-void Scheduling::cal_alap() {
-    // for (int i = 0; i < sorted_gate_list.size(); i++) {
-    //     vector<int> req;
-    //     vector<int> check_list = get_gate_inputs_from_in(sorted_gate_list[i]);
-        
-    //     for (int j = 0; j < check_list.size(); j++)
-    //         req.push_back(list_input[check_list[j]].req_time);
+void Scheduling::alap_scheduling(int max_latency) {
+    schedule.clear();
+    reset_schedule();
+    int no_gate = no_node - no_input;
+    int step = max_latency;
+    int no_scheduled_gate = 0;
+    vector<int> sche_this_step;                         //temp_var to push to schedule vector
+    vector<int> not_scheduled_list = get_gate_only();
+    vector<int> rdy;
+    stack<vector<int>>  reverse_schedule;
 
-    //     check_list = get_gate_inputs_from_gate(sorted_gate_list[i]);
-    //     for (int j = 0; j < check_list.size(); j++)
-    //         req.push_back(list_gate[check_list[j]].out.req_time);
-
-    //     int max = req[0];
-    //     for (int j = 1; j < req.size(); j++)
-    //         if (req[j] > max)
-    //             max = req[j];
+    // remove output from not_scheduled_list
+    for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
         
-    //     list_gate[sorted_gate_list[i]].out.req_time = max + list_gate[sorted_gate_list[i]].delay;
-    // }
-    
-    // cout << "---------------" << endl;
-    // for (int i = 0; i < no_gate; i++) {
-    //     cout << sorted_gate_list[i] << ". " << list_gate[sorted_gate_list[i]].out.req_time << endl;
-    // }
-    // cout << "---------------" << endl;
+        if (list_gate[*i].out.nxt_gate.size() == 0) {
+            list_gate[*i].step = step;
+            no_scheduled_gate++;
+            sche_this_step.push_back(*i);
+            i = not_scheduled_list.erase(i);
+        }
+        else
+            i++;
+    }
+    reverse_schedule.push(sche_this_step);
+
+    while (no_scheduled_gate < no_gate) {
+        sche_this_step.clear();
+        step--;
+        //Select vi with all scheduled successors
+        for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+            vector<int> suc_check = get_successor_gate(*i);
+            int j = 0;
+            for (j = 0; j < suc_check.size(); j++) {
+                if (list_gate[suc_check[j]].step != 0)
+                    continue;
+                else
+                    break;
+            }
+            if (j == suc_check.size()) {
+                rdy.push_back(*i);
+                i = not_scheduled_list.erase(i);
+            }
+            else
+                i++;
+        }
+        //Schedule vi
+        for (auto i = rdy.begin(); i != rdy.end();) {
+            vector<int> suc_check = get_successor_gate(*i);
+            
+            int min = list_gate[suc_check[0]].step;
+            for (int j = 1; j < suc_check.size(); j++) {
+                if (list_gate[suc_check[j]].step < min)
+                    min = list_gate[suc_check[j]].step;
+            }
+
+            list_gate[*i].step = min - list_gate[*i].delay;
+            sche_this_step.push_back(*i);
+            i = rdy.erase(i);
+            no_scheduled_gate++;
+        }
+
+        reverse_schedule.push(sche_this_step);
+    }
+
+    while (!reverse_schedule.empty()) {
+        schedule.push_back(reverse_schedule.top());
+        reverse_schedule.pop();
+    }
 }
 
-void Scheduling::cal_asap() {
-//     for (int i = 0; i < sorted_gate_list.size(); i++) {
-//         vector<int> arr;
-//         vector<int> check_list = get_gate_inputs_from_in(sorted_gate_list[i]);
+void Scheduling::asap_scheduling() {
+    schedule.clear();
+    reset_schedule();
+    int no_gate = no_node - no_input;
+    int step = 0;
+    int no_scheduled_gate = 0;                         //check for end of schedule    
+    vector<int> sche_this_step;                        //temp_var to push to schedule vector
+    vector<int> not_scheduled_list = get_gate_only();
+    vector<int> rdy;
+
+    while (no_scheduled_gate < no_gate) {
+        sche_this_step.clear();
+        step++;
+        //Select vi with all scheduled predecessors
+        for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+            vector<int> pre_check = get_predecessor_gate(*i);
+            int j = 0;
+            for (j = 0; j < pre_check.size(); j++) {
+                if (list_gate[pre_check[j]].step != 0)
+                    continue;
+                else
+                    break;
+            }
+
+            if (j == pre_check.size()) {
+                rdy.push_back(*i);
+                i = not_scheduled_list.erase(i);
+            }
+            else
+                i++;
+        }
+
+        //Schedule vi
+        for (auto i = rdy.begin(); i != rdy.end();) {
+            vector<int> pre_check = get_predecessor_gate_n_input(*i);
+            
+            int max = list_gate[pre_check[0]].step;
+            for (int j = 1; j < pre_check.size(); j++) {
+                if (list_gate[pre_check[j]].step > max)
+                    max = list_gate[pre_check[j]].step;
+            }
+            list_gate[*i].step = max + list_gate[*i].delay;
+
+            sche_this_step.push_back(*i);
+            i = rdy.erase(i);
+            no_scheduled_gate++;
+            
+        }
+
+        //Update gate list
+        for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+            if (list_gate[*i].step != 0)
+                i = not_scheduled_list.erase(i);
+            else
+                i++;
+        }
         
-//         for (int j = 0; j < check_list.size(); j++)
-//             arr.push_back(list_input[check_list[j]].arr_time);
-
-//         check_list = get_gate_inputs_from_gate(sorted_gate_list[i]);
-//         for (int j = 0; j < check_list.size(); j++)
-//             arr.push_back(list_gate[check_list[j]].out.arr_time);
-
-//         int max = arr[0];
-//         for (int j = 1; j < arr.size(); j++)
-//             if (arr[j] > max)
-//                 max = arr[j];
-        
-//         list_gate[sorted_gate_list[i]].out.arr_time = max + list_gate[sorted_gate_list[i]].delay;
-//     }
-    
-//     cout << "---------------" << endl;
-//     for (int i = 0; i < no_gate; i++) {
-//         cout << sorted_gate_list[i] << ". " << list_gate[sorted_gate_list[i]].out.arr_time << endl;
-//     }
-//     cout << "---------------" << endl;
-// }
-
-// void Scheduling::cal_slack() {
-//     for (int i = 0; i < no_gate; i++)
-//         list_gate[i].out.slack = list_gate[i].out.req_time - list_gate[i].out.arr_time;
-
-//     cout << "---------------" << endl;
-//     for (int i = 0; i < no_gate; i++) {
-//         cout << sorted_gate_list[i] << ". " << list_gate[sorted_gate_list[i]].out.slack << endl;
-//     }
-//     cout << "---------------" << endl;
+        schedule.push_back(sche_this_step);
+    }
 }
 
 void Scheduling::check_resource_available(vector<int> &vec, int step) {
@@ -88,15 +154,6 @@ void Scheduling::check_resource_available(vector<int> &vec, int step) {
             i++;
     }
 }
-
-// bool Scheduling::check_predecessor_scheduled(int gate_idx, vector<int> not_scheduled) {
-//     for (int i = 0; i < list_gate[gate_idx].out.nxt_gate.size(); i++) {
-//         for (int j = 0; j < not_scheduled.size(); j++)
-//             if (list_gate[gate_idx].out.nxt_gate[i] == not_scheduled[j])
-//                 return 0;        
-//     }
-//     return 1;
-// }
 
 vector<int> Scheduling::get_gate_only() {
     vector<int> not_scheduled;
@@ -113,7 +170,7 @@ void Scheduling::remove_scheduled_gate(vector<int> &gate_list) {
                 i = gate_list.erase(i);
             else
                 i++;
-        }
+    }
 }
 
 void Scheduling::list_scheduling(int and_c, int or_c, int not_c) {
@@ -207,7 +264,6 @@ void Scheduling::list_scheduling(int and_c, int or_c, int not_c) {
 
         schedule.push_back(sche_this_step);
     }
-    
 }
 
 void Scheduling::print_Schedule() {
@@ -216,20 +272,27 @@ void Scheduling::print_Schedule() {
     vector<int> or_rsc;
     cout <<  "------ Schedule ------" << endl;
     cout << "\t<And>\t<OR>\t<NOT>" << endl;
+
     for (int i = 0; i < schedule.size(); i++) {
         and_rsc.clear();
         not_rsc.clear();
         or_rsc.clear();
 
         for (int j = 0; j < schedule[i].size(); j++) {
-            if (list_gate[schedule[i][j]].operation == 0)
+            if (list_gate[schedule[i][j]].operation == 0) {
                 and_rsc.push_back(schedule[i][j]);
-            else if (list_gate[schedule[i][j]].operation == 1)
+            } 
+            else if (list_gate[schedule[i][j]].operation == 1) {
                 or_rsc.push_back(schedule[i][j]);
-            else if (list_gate[schedule[i][j]].operation == 2)
+            }
+            else if (list_gate[schedule[i][j]].operation == 2) {
                 not_rsc.push_back(schedule[i][j]);
+            }
+            else
+                continue;
         }
-        
+
+
         cout << "Step " << i+1 << ":\t";
         cout << "{";
         for (int j = 0; j < and_rsc.size(); j++)
@@ -239,9 +302,236 @@ void Scheduling::print_Schedule() {
             cout << " " << get_wire_name(or_rsc[j]);
         cout << " }\t{";
         for (int j = 0; j < not_rsc.size(); j++)
-            cout << " " << get_wire_name(or_rsc[j]);
+            cout << " " << get_wire_name(not_rsc[j]);
         cout << " }" << endl;
     }
-    cout << "Latency: " << schedule.size()+1 << endl;
-    cout << "End" << endl;    
+    
+    cout << "Latency: " << schedule.size() << endl;
+    cout << "End" << endl;
+    cout <<  "----------------------" << endl;
+}
+
+void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
+    struct Operation {
+        int gate_idx;           //gate_indx in list gate
+        int t_soon, t_late;     //start time for asap and alap
+        vector<int> pre_gate;   //contains predescessor gate idx
+    };
+    vector<Operation> ilp_extract;
+    vector<int> gate_list = get_gate_only();
+    vector<string>  and_rcs;
+    vector<string>  or_rcs;
+    vector<string>  not_rcs;
+    vector<vector<string>> binary_var;
+    vector<string> start_time_constr;
+    string  objective;
+
+
+    asap_scheduling();
+    vector<vector<int>> asap = get_schedule();
+    int min_step = asap.size();
+    for (int i = 0; i < gate_list.size(); i++) {
+        Operation new_op;
+        new_op.gate_idx = gate_list[i];
+        new_op.t_soon = list_gate[gate_list[i]].step;
+        new_op.pre_gate = get_predecessor_gate(gate_list[i]);
+        ilp_extract.push_back(new_op);
+    }
+    print_Schedule();
+
+    alap_scheduling(min_step);
+    vector<vector<int>> alap = get_schedule();
+    for (int i = 0; i < gate_list.size(); i++) {
+        ilp_extract[i].t_late = list_gate[gate_list[i]].step;
+    }
+    print_Schedule();
+
+    if (debug) {
+    cout << "--------------------" << endl;
+    for (int i = 0; i < ilp_extract.size(); i++)
+        cout << get_wire_name(ilp_extract[i].gate_idx) << " " << ilp_extract[i].t_soon << " " << ilp_extract[i].t_late << endl;
+    }
+
+    //get binary variable list
+    for (int i = 0; i < ilp_extract.size(); i++) {
+        vector<string> temp_var, temp_1;
+        for (int j = ilp_extract[i].t_soon; j <= ilp_extract[i].t_late; j++) {
+            temp_var.push_back("x_" + to_string(ilp_extract[i].gate_idx) + "_" + to_string(j));
+            objective = objective + to_string(j) + " " + "x_" + to_string(ilp_extract[i].gate_idx) + "_" + to_string(j) + " + ";
+        }
+        binary_var.push_back(temp_var);
+    }
+    
+    objective.pop_back();
+    objective.pop_back();
+    objective.pop_back();
+
+    if (debug) {
+        cout << "--------------------" << endl;
+        for (int i = 0; i < binary_var.size(); i++) {
+            for (int j = 0; j < binary_var[i].size(); j++)
+                cout << binary_var[i][j] << " ";
+            cout << endl;
+        }
+        cout << "Objective: " << objective << endl;
+    }
+    
+    //get start time constraint
+    cout << "--------------------" << endl;
+    for (int i = 0; i < binary_var.size(); i++) {
+        string temp_var = binary_var[i][0];
+        for (int j = 1; j < binary_var[i].size(); j++)
+            temp_var = temp_var + " + " + binary_var[i][j];
+        temp_var = temp_var + " = 1";
+        start_time_constr.push_back(temp_var);
+    }
+
+    //Get resource constraint
+    for (int i = 0; i < min_step; i++) {
+        string and_line, or_line, not_line;
+
+        for (int j = 0; j < ilp_extract.size(); j++) {
+            if ((i+1 >= ilp_extract[j].t_soon) && (i+1 <= ilp_extract[j].t_late)) {
+                switch (list_gate[ilp_extract[j].gate_idx].operation) {
+                case 0:
+                    and_line = and_line + "x_" + to_string(ilp_extract[j].gate_idx) + "_" + to_string(i+1) + " + ";
+                    break;
+                case 1:
+                    or_line = or_line + "x_" + to_string(ilp_extract[j].gate_idx) + "_" + to_string(i+1) + " + ";
+                    break;
+                case 2:
+                    not_line = not_line + "x_" + to_string(ilp_extract[j].gate_idx) + "_" + to_string(i+1) + " + ";
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+        
+        if (and_line.size() != 0) {
+            and_line.pop_back();
+            and_line.pop_back();
+            and_line = and_line + "<= " + to_string(and_c);
+            and_rcs.push_back(and_line);
+        }
+
+        if (or_line.size() != 0) {
+            or_line.pop_back();
+            or_line.pop_back();
+            or_line = or_line + "<= " + to_string(or_c);
+            or_rcs.push_back(or_line);
+        }
+
+        if (not_line.size() != 0) {
+            not_line.pop_back();
+            not_line.pop_back();
+            not_line = not_line + "<= " + to_string(not_c);
+            not_rcs.push_back(not_line);
+        }
+    }
+
+    if (debug) {
+        cout << "And constraint ineq" << endl;
+        for (int i = 0; i < and_rcs.size(); i++)
+            cout << and_rcs[i] << endl;
+        
+        cout << "OR constraint ineq" << endl;
+        for (int i = 0; i < or_rcs.size(); i++)
+            cout << or_rcs[i] << endl;
+
+        cout << "Not constraint ineq" << endl;
+        for (int i = 0; i < not_rcs.size(); i++)
+            cout << not_rcs[i] << endl;
+    }
+
+    //Dependency constraint
+    cout << "--------------------" << endl;
+    vector<string> dependency_constr;
+    for (int i = 0; i < ilp_extract.size(); i++) {
+        // cout << list_gate[ilp_extract[i].gate_idx].out.wire_name << endl;
+        if ((ilp_extract[i].t_late - ilp_extract[i].t_soon) != 0 ) {
+            string temp_var;
+            // Check the predecessor of the gate
+            vector<int> pre_check = get_predecessor_gate(ilp_extract[i].gate_idx);
+            // Check the sucessor of the gate
+            vector<int> suc_check = get_successor_gate(ilp_extract[i].gate_idx);
+            
+            // If size of the pre_check != 0 => for each pre, conduct a inequation
+            for (int j = 0; j < pre_check.size(); j++) {
+                temp_var.clear();
+                int k;
+                for (k = 0; k < ilp_extract.size(); k++)
+                    if (pre_check[j] == ilp_extract[k].gate_idx) break;
+                for (int m = 0; m < binary_var[i].size(); m++)
+                    temp_var = temp_var + to_string(m+ilp_extract[i].t_soon) + " " + binary_var[i][m] + " + ";
+                temp_var.pop_back();
+                temp_var.pop_back();
+                temp_var.pop_back();
+                for (int m = 0; m < binary_var[k].size(); m++)
+                    temp_var = temp_var + " - " + to_string(m+ilp_extract[k].t_soon) + " " + binary_var[k][m];
+                temp_var = temp_var + " >= " + to_string(list_gate[ilp_extract[i].gate_idx].delay);
+                
+                dependency_constr.push_back(temp_var);
+            }
+
+            // If size of the suc_check != 0 => for each suc, conduct a ineq
+            for (int j = 0; j < suc_check.size(); j++) {
+                temp_var.clear();
+                int k;
+                for (k = 0; k < ilp_extract.size(); k++)
+                    if (suc_check[j] == ilp_extract[k].gate_idx) break;
+                for (int m = 0; m < binary_var[k].size(); m++)
+                    temp_var = temp_var + to_string(m+ilp_extract[k].t_soon) + " " + binary_var[k][m] + " + ";
+                temp_var.pop_back();
+                temp_var.pop_back();
+                temp_var.pop_back();
+                for (int m = 0; m < binary_var[i].size(); m++)
+                    temp_var = temp_var + " - " + to_string(m+ilp_extract[i].t_soon) + " " + binary_var[i][m];
+                temp_var = temp_var + " >= " + to_string(list_gate[ilp_extract[i].gate_idx].delay);
+                dependency_constr.push_back(temp_var);
+            }
+        }
+    }
+
+    sort(dependency_constr.begin(), dependency_constr.end());
+    dependency_constr.erase(unique(dependency_constr.begin(), dependency_constr.end()), dependency_constr.end());
+
+    if (debug) {
+    for (int i = 0; i < dependency_constr.size(); i++)
+        cout << dependency_constr[i] << endl;
+    }
+
+    //Export ILP file
+    string output_file_name = getModuleName() + "_ilp.in";
+    ofstream output_file(output_file_name);
+    output_file << "Minimize" << endl;
+    output_file << " obj: " << objective << endl;
+    output_file << "Subject To" << endl;
+    int no = 1;
+    for (int i = 0; i < start_time_constr.size(); i++) {
+        output_file << " c" << no << ": " << start_time_constr[i] << endl;
+        no++;
+    }
+    for (int i = 0; i < dependency_constr.size(); i++) {
+        output_file << " c" << no << ": " << dependency_constr[i] << endl;
+        no++;
+    }
+    for (int i = 0; i < and_rcs.size(); i++) {
+        output_file << " c" << no << ": " << and_rcs[i] << endl;
+        no++;
+    }
+    for (int i = 0; i < or_rcs.size(); i++) {
+        output_file << " c" << no << ": " << or_rcs[i] << endl;
+        no++;
+    }
+    for (int i = 0; i < not_rcs.size(); i++) {
+        output_file << " c" << no << ": " << not_rcs[i] << endl;
+        no++;
+    }
+    output_file << "Binary" << endl;
+    for (int i = 0; i < binary_var.size(); i++)
+        for (int j = 0; j < binary_var[i].size(); j++)
+            output_file << " " << binary_var[i][j] << endl;
+    output_file << "End" << endl;
+    output_file.close();
 }

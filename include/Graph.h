@@ -52,6 +52,7 @@ public:
         
         vector<int> get_successor_gate(int);
         vector<int> get_predecessor_gate(int);
+        vector<int> get_predecessor_gate_n_input(int);
         vector<int> get_circuit_outputs();
 
         void print_Gate(int);
