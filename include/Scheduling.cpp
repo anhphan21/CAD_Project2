@@ -570,7 +570,6 @@ vector<vector<int>> Scheduling::read_sol_file(int step) {
                 int step = stoi(temp);
                 int idx = stoi(part);
                 schedule_temp[step-1].push_back(idx);
-                cout << get_wire_name(idx) <<  " _ " << step << endl;
             }
             else
                 continue;
