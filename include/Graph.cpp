@@ -19,30 +19,23 @@ int Graph::get_wire_idx(string output_name) {
         if (list_gate[i].out.wire_name == output_name)
             return i;
     }
-    // cout << "Cannot find the gate corresponding to wire " << output_name << "!" << endl;
     return -1;
 }
 
 string Graph::get_wire_name(int idx) { return list_gate[idx].out.wire_name; } 
 
 vector<int> Graph::get_gate_inputs(int gate_idx) {
-    vector<int> inputs;
-    for (int i = 0; i < no_node; i++) {
-        for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
-            if (list_gate[i].out.nxt_gate[j] == gate_idx)
-                inputs.push_back(i);
-        }
-    }
-    return inputs;
+    return list_gate[gate_idx].pre_gate;
 }
 
 void Graph::add_Input(string in_name) {
     Gate new_input;
-    new_input.operation = -1;
+    new_input.operation = -1;               // -1 for input
     new_input.out.wire_name = in_name;
     new_input.out.nxt_gate.resize(0);
     new_input.out.arr_time = 0;
     new_input.out.req_time = 0;
+    new_input.pre_gate.resize(0);
     new_input.out.slack = new_input.out.req_time - new_input.out.arr_time;
     list_gate.push_back(new_input);
     no_node++;
@@ -75,6 +68,7 @@ void Graph::add_Gate(vector<string> in_name, string out_name, int op) {
     //2nd: Add connection to the new gate to previous inputs/gates
     for (int i = 0; i < in_name.size(); i++) {
         int idx = get_wire_idx(in_name[i]);
+        list_gate[gate_idx].pre_gate.push_back(idx);
         list_gate[idx].out.nxt_gate.push_back(gate_idx);
     }
 }
@@ -96,6 +90,7 @@ void Graph::add_Inv(string in_name, string out_name) {
 
     int idx = get_wire_idx(in_name);
     list_gate[idx].out.nxt_gate.push_back(gate_idx);
+    list_gate[gate_idx].pre_gate.push_back(idx);
 }
 
 vector<int> Graph::get_successor_gate(int gate_idx) {
@@ -108,33 +103,15 @@ vector<int> Graph::get_successor_gate(int gate_idx) {
 
 vector<int> Graph::get_predecessor_gate(int gate_idx) {
     vector<int> precessor;
-    for (int i = 0; i < no_node; i++) {
-        if (list_gate[i].operation == -1) continue;
-        if (i == gate_idx) continue;
-        else {
-            for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
-                int check_idx = list_gate[i].out.nxt_gate[j];
-                if (check_idx == gate_idx)
-                    precessor.push_back(i);
-            }
-        }
+    for (int i = 0; i < list_gate[gate_idx].pre_gate.size(); i++) {
+        if (list_gate[list_gate[gate_idx].pre_gate[i]].operation != -1)
+            precessor.push_back(list_gate[gate_idx].pre_gate[i]);
     }
     return precessor;
 }
 
 vector<int> Graph::get_predecessor_gate_n_input(int gate_idx) {
-    vector<int> precessor;
-    for (int i = 0; i < no_node; i++) {
-        if (i == gate_idx) continue;
-        else {
-            for (int j = 0; j < list_gate[i].out.nxt_gate.size(); j++) {
-                int check_idx = list_gate[i].out.nxt_gate[j];
-                if (check_idx == gate_idx)
-                    precessor.push_back(i);
-            }
-        }
-    }
-    return precessor;
+    return list_gate[gate_idx].pre_gate;
 }
 
 vector<int> Graph::get_circuit_outputs() {
@@ -186,7 +163,6 @@ void Graph::print_Graph() {
             cout << endl;
         }
     }
-    cout << "----------------------------------------" << endl;
 }
 
 void Graph::topology_sort_util(int v, bool visited[], stack<int>& Stack) {

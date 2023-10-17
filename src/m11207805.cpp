@@ -17,5 +17,6 @@ int main(int argc, char* argv[]) {
 	else
 		cout << "Cannot detect which algorithm for scheduling!!" << endl;
 	circuit.print_Schedule();
+	
 	return 0;
 }

@@ -9,15 +9,18 @@ Scheduling::~Scheduling() {
 }
 
 void Scheduling::reset_schedule() {
-    for (int i = 0; i < no_node; i++) {
+    for (int i = 0; i < no_node; i++)
         list_gate[i].step = 0;
-    }
     schedule.clear();
+    max_step = 0;
+    sche_type = -1;
 }
 
 void Scheduling::alap_scheduling(int max_latency) {
     schedule.clear();
     reset_schedule();
+    max_step = max_latency;
+    sche_type = 2;
     int no_gate = no_node - no_input;
     int step = max_latency;
     int no_scheduled_gate = 0;
@@ -144,6 +147,8 @@ void Scheduling::asap_scheduling() {
         
         schedule.push_back(sche_this_step);
     }
+    max_step = schedule.size();
+    sche_type = 1;
 }
 
 void Scheduling::check_resource_available(vector<int> &vec, int step) {
@@ -188,25 +193,47 @@ void Scheduling::list_scheduling(int and_c, int or_c, int not_c) {
     vector<int> and_rsc(0), not_rsc(0), or_rsc(0);     //chekc for RSC
     vector<int> not_scheduled_list = get_gate_only(); 
 
-    //Get initial rdy vector which gate's inputs are only the inputs of circuit
-    for (int i = 0; i < no_gate; i++) {
-        vector<int> pre_check = get_predecessor_gate(not_scheduled_list[i]);
-        if (pre_check.size() == 0)
-            rdy.push_back(not_scheduled_list[i]);
+    if (debug) {
+        cout << "initial not schedule vector: ";
+        for (int i = 0; i < not_scheduled_list.size(); i++)
+            cout << not_scheduled_list[i] << " ";
+        cout << endl;
     }
-    //Remove the gate which in rdy vector from not_scheduled_list
-    for (int i = 0; i < rdy.size(); i++) {
-        for (int j = 0; j < not_scheduled_list.size(); j++) {
-            if (rdy[i] == not_scheduled_list[j]) {
-                not_scheduled_list.erase(not_scheduled_list.begin()+j);
-                break;
-            }
-        }    
-    }
+
     
     while (no_scheduled_gate < no_gate) {
         sche_this_step.clear();
         step++;
+        // Get the rdy vector from the not list sadasd
+        for (auto i = not_scheduled_list.begin(); i != not_scheduled_list.end();) {
+            vector<int> pre_check = get_predecessor_gate(*i);
+            int j = 0;
+            for (j = 0; j < pre_check.size(); j++) {
+                if (list_gate[pre_check[j]].step != 0)
+                    continue;
+                else
+                    break;
+            }
+
+            if (j == pre_check.size()) {
+                rdy.push_back(*i);
+                i = not_scheduled_list.erase(i);
+            }
+            else
+                i++;
+        }
+        
+        if (debug) {
+            cout << "not schedule vector after update: ";
+            for (int i = 0; i < not_scheduled_list.size(); i++)
+                cout << get_wire_name(not_scheduled_list[i]) << " ";
+            cout << endl;
+            cout << "rdy vector after update: ";
+            for (int i = 0; i < rdy.size(); i++)
+                cout << get_wire_name(rdy[i]) << " ";
+            cout << endl;
+        }   
+
         // Check resource are free from pre step
         check_resource_available(and_rsc, step);
         check_resource_available(or_rsc, step);
@@ -241,6 +268,7 @@ void Scheduling::list_scheduling(int and_c, int or_c, int not_c) {
                 no_scheduled_gate++;
                 list_gate[rdy[i]].step = step;
                 sche_this_step.push_back(rdy[i]);
+                if (debug) cout << "Schedule gate " << get_wire_name(rdy[i]) << " at step " << step << endl; 
             }
         }
 
@@ -248,65 +276,70 @@ void Scheduling::list_scheduling(int and_c, int or_c, int not_c) {
         remove_scheduled_gate(not_scheduled_list);
         remove_scheduled_gate(rdy);
 
-        //update rdy list with the new gates from not_scheduled_list
-        for (int i = 0; i < not_scheduled_list.size(); i++) {
-            vector<int> pre_check = get_predecessor_gate(not_scheduled_list[i]);
-            int j = 0;
-            for (j = 0; j < pre_check.size(); j++) {
-                if (list_gate[pre_check[j]].step != 0)
-                    continue;
-                else
-                    break;
-            }
-            if (j == pre_check.size())
-                rdy.push_back(not_scheduled_list[i]);
-        }
-
         schedule.push_back(sche_this_step);
     }
+    max_step = schedule.size();
+    sche_type = 0;
 }
 
 void Scheduling::print_Schedule() {
     vector<int> and_rsc;
     vector<int> not_rsc;
     vector<int> or_rsc;
-    cout <<  "\t------ Schedule ------" << endl;
+    cout <<  "------------------ Schedule ------------------" << endl;
+    switch (sche_type) {
+    case 0:
+        cout << "Heuristic Scheduling Result" << endl;
+        break;
+    case 1:
+        cout << "ASAP Scheduling Result" << endl;
+        break;
+    case 2:
+        cout << "ALAP Scheduling Result" << endl;
+        break;
+    case 3:
+        cout << "ILP Scheduling Result" << endl;
+        break;
+    default:
+        break;
+    }
     cout << "\t<And>\t<OR>\t<NOT>" << endl;
 
     for (int i = 0; i < schedule.size(); i++) {
-        and_rsc.clear();
-        not_rsc.clear();
-        or_rsc.clear();
+        if (schedule[i].size() != 0) {
+            and_rsc.clear();
+            not_rsc.clear();
+            or_rsc.clear();
 
-        for (int j = 0; j < schedule[i].size(); j++) {
-            if (list_gate[schedule[i][j]].operation == 0) {
-                and_rsc.push_back(schedule[i][j]);
-            } 
-            else if (list_gate[schedule[i][j]].operation == 1) {
-                or_rsc.push_back(schedule[i][j]);
+            for (int j = 0; j < schedule[i].size(); j++) {
+                if (list_gate[schedule[i][j]].operation == 0) {
+                    and_rsc.push_back(schedule[i][j]);
+                } 
+                else if (list_gate[schedule[i][j]].operation == 1) {
+                    or_rsc.push_back(schedule[i][j]);
+                }
+                else if (list_gate[schedule[i][j]].operation == 2) {
+                    not_rsc.push_back(schedule[i][j]);
+                }
+                else
+                    continue;
             }
-            else if (list_gate[schedule[i][j]].operation == 2) {
-                not_rsc.push_back(schedule[i][j]);
-            }
-            else
-                continue;
+
+
+            cout << "Step " << max_step - schedule.size()+ i +1 << ":\t";
+            cout << "{";
+            for (int j = 0; j < and_rsc.size(); j++)
+                cout << " " << get_wire_name(and_rsc[j]);
+            cout << " }\t{";
+            for (int j = 0; j < or_rsc.size(); j++)
+                cout << " " << get_wire_name(or_rsc[j]);
+            cout << " }\t{";
+            for (int j = 0; j < not_rsc.size(); j++)
+                cout << " " << get_wire_name(not_rsc[j]);
+            cout << " }" << endl;
         }
-
-
-        cout << "Step " << i+1 << ":\t";
-        cout << "{";
-        for (int j = 0; j < and_rsc.size(); j++)
-            cout << " " << get_wire_name(and_rsc[j]);
-        cout << " }\t{";
-        for (int j = 0; j < or_rsc.size(); j++)
-            cout << " " << get_wire_name(or_rsc[j]);
-        cout << " }\t{";
-        for (int j = 0; j < not_rsc.size(); j++)
-            cout << " " << get_wire_name(not_rsc[j]);
-        cout << " }" << endl;
     }
-    
-    cout << "Latency: " << schedule.size() << endl;
+    cout << "Latency: " << max_step << endl;
     cout << "End" << endl << endl;
 }
 
@@ -314,7 +347,6 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     struct Operation {
         int gate_idx;           //gate_indx in list gate
         int t_soon, t_late;     //start time for asap and alap
-        vector<int> pre_gate;   //contains predescessor gate idx
     };
     vector<Operation> ilp_extract;
     vector<int> gate_list = get_gate_only();
@@ -326,6 +358,7 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     string  objective;
 
     list_scheduling(and_c, or_c, not_c);
+    print_Schedule();
     int min_step = schedule.size();
 
     asap_scheduling();
@@ -334,10 +367,9 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
         Operation new_op;
         new_op.gate_idx = gate_list[i];
         new_op.t_soon = list_gate[gate_list[i]].step;
-        new_op.pre_gate = get_predecessor_gate(gate_list[i]);
         ilp_extract.push_back(new_op);
     }
-    if (debug) print_Schedule();
+    print_Schedule();
 
     alap_scheduling(min_step);
     vector<vector<int>> alap = get_schedule();
@@ -345,7 +377,7 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
         ilp_extract[i].t_late = list_gate[gate_list[i]].step;
     }
 
-    if (debug) print_Schedule();
+    print_Schedule();
 
     if (debug) {
     cout << "--------------------" << endl;
@@ -502,7 +534,8 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     }
 
     //Export ILP file
-    string output_file_name = getModuleName() + ".lp";
+    // string output_file_name = getModuleName() + ".lp";
+    string output_file_name = "out.lp";
     string out_file_dir = "./output/" + output_file_name;
     ofstream output_file(out_file_dir);
     output_file << "Minimize" << endl;
@@ -536,15 +569,18 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     output_file << "End" << endl;
     output_file.close();
 
-    string cmd = "gurobi_cl ResultFile=./output/" + getModuleName() + ".sol " + out_file_dir;
-    cout << cmd << endl;
+    // string cmd = "gurobi_cl ResultFile=./output/" + getModuleName() + ".sol " + out_file_dir;
+    string cmd = "gurobi_cl ResultFile=./output/out.sol " + out_file_dir;
     const char * c = cmd.c_str();
     system(c);
     schedule = read_sol_file(min_step);
 }
 
 vector<vector<int>> Scheduling::read_sol_file(int step) {
-    string sol_file_name = getModuleName() + ".sol";
+    // string sol_file_name = getModuleName() + ".sol";
+    // string sol_file_dir = "./output/" + sol_file_name;
+    int _max_step = 0;
+    string sol_file_name = "out.sol";
     string sol_file_dir = "./output/" + sol_file_name;
     ifstream sol_file(sol_file_dir);
     string temp;
@@ -570,6 +606,7 @@ vector<vector<int>> Scheduling::read_sol_file(int step) {
                 }
                 temp.erase(temp.begin());
                 int step = stoi(temp);
+                if (step > _max_step) _max_step = step;
                 int idx = stoi(part);
                 schedule_temp[step-1].push_back(idx);
             }
@@ -577,5 +614,6 @@ vector<vector<int>> Scheduling::read_sol_file(int step) {
                 continue;
         }
     }
+    max_step = _max_step;
     return schedule_temp;
 }
