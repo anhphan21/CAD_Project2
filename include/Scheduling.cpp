@@ -270,7 +270,7 @@ void Scheduling::print_Schedule() {
     vector<int> and_rsc;
     vector<int> not_rsc;
     vector<int> or_rsc;
-    cout <<  "------ Schedule ------" << endl;
+    cout <<  "\t------ Schedule ------" << endl;
     cout << "\t<And>\t<OR>\t<NOT>" << endl;
 
     for (int i = 0; i < schedule.size(); i++) {
@@ -307,8 +307,7 @@ void Scheduling::print_Schedule() {
     }
     
     cout << "Latency: " << schedule.size() << endl;
-    cout << "End" << endl;
-    cout <<  "----------------------" << endl;
+    cout << "End" << endl << endl;
 }
 
 void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
@@ -326,10 +325,11 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     vector<string> start_time_constr;
     string  objective;
 
+    list_scheduling(and_c, or_c, not_c);
+    int min_step = schedule.size();
 
     asap_scheduling();
     vector<vector<int>> asap = get_schedule();
-    int min_step = asap.size();
     for (int i = 0; i < gate_list.size(); i++) {
         Operation new_op;
         new_op.gate_idx = gate_list[i];
@@ -337,14 +337,15 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
         new_op.pre_gate = get_predecessor_gate(gate_list[i]);
         ilp_extract.push_back(new_op);
     }
-    print_Schedule();
+    if (debug) print_Schedule();
 
     alap_scheduling(min_step);
     vector<vector<int>> alap = get_schedule();
     for (int i = 0; i < gate_list.size(); i++) {
         ilp_extract[i].t_late = list_gate[gate_list[i]].step;
     }
-    print_Schedule();
+
+    if (debug) print_Schedule();
 
     if (debug) {
     cout << "--------------------" << endl;
@@ -377,7 +378,6 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     }
     
     //get start time constraint
-    cout << "--------------------" << endl;
     for (int i = 0; i < binary_var.size(); i++) {
         string temp_var = binary_var[i][0];
         for (int j = 1; j < binary_var[i].size(); j++)
@@ -431,6 +431,7 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     }
 
     if (debug) {
+        cout << "--------------------" << endl;
         cout << "And constraint ineq" << endl;
         for (int i = 0; i < and_rcs.size(); i++)
             cout << and_rcs[i] << endl;
@@ -445,7 +446,6 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     }
 
     //Dependency constraint
-    cout << "--------------------" << endl;
     vector<string> dependency_constr;
     for (int i = 0; i < ilp_extract.size(); i++) {
         // cout << list_gate[ilp_extract[i].gate_idx].out.wire_name << endl;
@@ -503,7 +503,8 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
 
     //Export ILP file
     string output_file_name = getModuleName() + ".lp";
-    ofstream output_file(output_file_name);
+    string out_file_dir = "./output/" + output_file_name;
+    ofstream output_file(out_file_dir);
     output_file << "Minimize" << endl;
     output_file << " obj: " << objective << endl;
     output_file << "Subject To" << endl;
@@ -535,7 +536,7 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
     output_file << "End" << endl;
     output_file.close();
 
-    string cmd = "gurobi_cl ResultFile=" + getModuleName() + ".sol " + getModuleName() + ".lp";
+    string cmd = "gurobi_cl ResultFile=./output/" + getModuleName() + ".sol " + out_file_dir;
     cout << cmd << endl;
     const char * c = cmd.c_str();
     system(c);
@@ -544,7 +545,8 @@ void Scheduling::ilp_scheduling(int and_c, int or_c, int not_c) {
 
 vector<vector<int>> Scheduling::read_sol_file(int step) {
     string sol_file_name = getModuleName() + ".sol";
-    ifstream sol_file(sol_file_name);
+    string sol_file_dir = "./output/" + sol_file_name;
+    ifstream sol_file(sol_file_dir);
     string temp;
     vector<vector<int>> schedule_temp(step);
 

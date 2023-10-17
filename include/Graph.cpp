@@ -148,7 +148,7 @@ vector<int> Graph::get_circuit_outputs() {
 }
 
 void Graph::print_Graph() {
-    cout << "--------------------" << endl;
+    cout << "----------------------------------------" << endl;
     cout << "Module name: " << module_name << endl;
     cout << "Input: ";
     for (int i = 0; i < no_node; i++)
@@ -157,7 +157,7 @@ void Graph::print_Graph() {
     cout << endl;
 
     vector<int> outputs = get_circuit_outputs();
-    cout << "Input: ";
+    cout << "Output: ";
     for (int i = 0; i < outputs.size(); i++)
         cout << get_wire_name(outputs[i]) << " ";
     cout << endl;
@@ -165,7 +165,7 @@ void Graph::print_Graph() {
     cout << "Gate:" << endl;
     for (int i = 0; i < no_node; i++) {
         if (list_gate[i].operation != -1) {
-            cout << i << ". " << list_gate[i].out.wire_name << "=" ;
+            cout << " " << i << ". " << list_gate[i].out.wire_name << "=" ;
             
             int op_code = list_gate[i].operation;
             string op_code_s;
@@ -186,7 +186,7 @@ void Graph::print_Graph() {
             cout << endl;
         }
     }
-    cout << "--------------------" << endl;
+    cout << "----------------------------------------" << endl;
 }
 
 void Graph::topology_sort_util(int v, bool visited[], stack<int>& Stack) {
@@ -326,6 +326,12 @@ void Graph::read_blif_file(string dir_path) {
 			}
 			break;
 		}
+        else if ((temp == ".default_input_arrival") || (temp == ".default_output_required") || (temp == ".default_input_drive") 
+                || (temp == ".default_output_load ") || (temp == ".default_max_input_load")) {
+            mode = 0;
+            getline(blif_file, temp);
+			continue;
+        }
 		
 		if (mode == 1) {
 			if (temp == "\\")
@@ -356,6 +362,5 @@ void Graph::read_blif_file(string dir_path) {
 		}
 	}
 	blif_file.close();
-	cout << "Done reading file" << endl;
     topology_sort();
 }
