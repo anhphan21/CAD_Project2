@@ -1,0 +1,28 @@
+# Test case with difference result for Heuristic and ILP is aoi_i2.blif benchmark
+    cmd: ./mlrcs -e ./aoi_benchmark/aoi_i2.blif 7 7 7 >> i2_777.log
+# Result
+## For Heuristic Algorithm
+    Heuristic Scheduling Result
+        <And>	<OR>	<NOT>
+    Step 1:	{ e420 e419 g420 d419 w418 }	{ j419 l419 c420 t419 x418 y420 m418 }	{ u418 }
+    Step 2:	{ f420 h419 x419 k419 m419 d420 o420 }	{ l418 k418 j418 l420 k420 j420 i420 }	{ }
+    Step 3:	{ a420 p419 }	{ s420 r420 q420 p420 s418 r418 q418 }	{ }
+    Step 4:	{ }	{ p418 u419 y418 z420 n418 m420 r419 }	{ }
+    Step 5:	{ v420 v419 z418 a421 o418 n420 }	{ h420 t420 t418 }	{ }
+    Step 6:	{ c421 c419 u420 v418 }	{ }	{ }
+    Step 7:	{ }	{ w419 }	{ }
+    Step 8:	{ }	{ t6 }	{ }
+    Latency: 8
+    End
+## For ILP solver
+    ILP Scheduling Result
+        <And>	<OR>	<NOT>
+    Step 0:	{ e420 e419 g420 d419 w418 }	{ j419 l419 c420 t419 x418 y420 m418 }	{ u418 }
+    Step 1:	{ f420 h419 x419 k419 m419 d420 o420 }	{ u419 y418 z420 l418 k418 j418 q418 }	{ }
+    Step 2:	{ a420 p419 v420 v419 z418 a421 }	{ n418 k420 j420 i420 s418 r418 p418 }	{ }
+    Step 3:	{ c421 c419 o418 }	{ r419 l420 s420 r420 q420 p420 t418 }	{ }
+    Step 4:	{ v418 }	{ h420 m420 t420 }	{ }
+    Step 5:	{ n420 u420 }	{ w419 }	{ }
+    Step 6:	{ }	{ t6 }	{ }
+    Latency: 7
+    End

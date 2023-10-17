@@ -615,5 +615,6 @@ vector<vector<int>> Scheduling::read_sol_file(int step) {
         }
     }
     max_step = _max_step;
+    sche_type = 3;
     return schedule_temp;
 }
