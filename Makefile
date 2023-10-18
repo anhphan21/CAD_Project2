@@ -5,8 +5,6 @@ LIBS		= ./include
 OUT_DIRS	= ./output
 BENCHMARK_DIRS = ./aoi_benchmark
 
-#	./mlrcs -h ${BENCHMARK_DIRS}/sample02.blif 2 1 1
-
 .PHONY: main
 main:
 	${CXX} ${CXXLAGS} ${LIBS}/Scheduling.cpp ${LIBS}/Graph.cpp ${SRC_DIRS}/m11207805.cpp -o mlrcs
