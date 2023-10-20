@@ -8,12 +8,13 @@ int main(int argc, char* argv[]) {
 	int INV_MAX;
 
 	Scheduling circuit;
+	string mode = argv[1];
 	circuit.read_blif_file(argv[2]);
 	circuit.print_Graph();
-	// cout << argv[1] << endl;
-	if (argv[1] == "-h")
+
+	if (mode == "-e")
 		circuit.ilp_scheduling(stoi(argv[3]), stoi(argv[4]), stoi(argv[5]));
-	else if (argv[1] == "-e")
+	else if (mode == "-h")
 		circuit.list_scheduling(stoi(argv[3]), stoi(argv[4]), stoi(argv[5]));
 	else
 		cout << "Cannot detect which algorithm for scheduling!!" << endl;
