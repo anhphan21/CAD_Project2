@@ -5,17 +5,19 @@
 #include <algorithm>
 #include <stack>
 #include <cstring>
+#include <list>
 
 class Scheduling : public Graph {
 protected:
-    bool    debug   = 1;
+    bool    debug   = 0;
     int AND_CONST   = 0;
     int OR_CONST    = 0;
     int NOT_CONST   = 0;
 
     void check_resource_available(vector<int>&, int);
     vector<vector<int>> schedule;
-
+    int max_step = 0;       //Maximum step of scheduling
+    int sche_type = -1;      //-1: unschedule, 0 for list scheduling, 1 for asap, 2 for alap, 3 for ilp scheduling
 public:
     Scheduling();
     ~Scheduling();

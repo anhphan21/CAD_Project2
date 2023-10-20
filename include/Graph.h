@@ -15,16 +15,17 @@ protected:
     struct Wire {
         string          wire_name;
         int             req_time, arr_time, slack = 0;
-        vector<int>     nxt_gate;
+        vector<int>     nxt_gate;                   //vector store idx of next gate
     };
 
     struct  Gate {
+        vector<int>     pre_gate;                   //vector stores idx of previous gate
         int             operation;                  //-1: Input, 0:AND, 1:OR, 2:Not
-        int             delay = 1;
+        int             delay = 1;                  //gate delay (Default = 1)
         Wire            out;
         int             step = 0;                   //0: unscheduled, > 0 schedule at step ...
     };
-
+    // bool debug                  =   0;
     string module_name;
     vector<Gate> list_gate;
     vector<int> sorted_gate_list;
