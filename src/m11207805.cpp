@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 	else if (mode == "-h")
 		circuit.list_scheduling(stoi(argv[3]), stoi(argv[4]), stoi(argv[5]));
 	else
-		cout << "Cannot detect which algorithm for scheduling!!" << endl;
+		cout << "Cannot detect which algorithm used for scheduling!!" << endl;
 	circuit.print_Schedule();
 	
 	return 0;

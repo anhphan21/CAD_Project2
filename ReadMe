@@ -1,3 +1,10 @@
+# Prerequisite
+    Gurobi must be installed on the system.
+
+# Description
+    MLRCS program have 2 options: -h for heuristic scheduling, -e for ILP extraction scheduling
+    For -e option, the program will extract the integer linear inequations and store in ./output/out.lp file, the program will call gurobi to solve the ILP. Gurobi result will be stored in ./output/out.sol and display the schedule on terminal.
+
 # How to run program from the start
 
     > make
