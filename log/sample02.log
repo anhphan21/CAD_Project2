@@ -1,0 +1,94 @@
+----------------------------------------
+Module name: sample02
+Input: a b c d e f 
+Output: o p q 
+Gate:
+ 6. o=b.h.k
+ 7. p=g'
+ 8. q=n'
+ 9. g=a+d
+ 10. h=a.c
+ 11. i=c'
+ 12. j=d+e+f
+ 13. k=g+h+i
+ 14. l=h.i.j
+ 15. m=i.j
+ 16. n=l.m
+------------------ Schedule ------------------
+Heuristic Scheduling Result
+	<And>	<OR>	<NOT>
+Step 1:	{ h }	{ j }	{ i }
+Step 2:	{ m l }	{ g }	{ }
+Step 3:	{ n }	{ k }	{ p }
+Step 4:	{ o }	{ }	{ q }
+Latency: 4
+End
+
+------------------ Schedule ------------------
+ASAP Scheduling Result
+	<And>	<OR>	<NOT>
+Step 1:	{ h }	{ j g }	{ i }
+Step 2:	{ m l }	{ k }	{ p }
+Step 3:	{ n o }	{ }	{ }
+Step 4:	{ }	{ }	{ q }
+Latency: 4
+End
+
+------------------ Schedule ------------------
+ALAP Scheduling Result
+	<And>	<OR>	<NOT>
+Step 1:	{ h }	{ j }	{ i }
+Step 2:	{ m l }	{ g }	{ }
+Step 3:	{ n }	{ k }	{ }
+Step 4:	{ o }	{ }	{ q p }
+Latency: 4
+End
+
+Set parameter Username
+Set parameter LogFile to value "gurobi.log"
+Academic license - for non-commercial use only - expires 2024-10-16
+Using license file /home/anhph/gurobi.lic
+
+Gurobi Optimizer version 10.0.3 build v10.0.3rc0 (linux64)
+Copyright (c) 2023, Gurobi Optimization, LLC
+
+Read LP format model from file ./output/out.lp
+Reading time = 0.00 seconds
+obj: 28 rows, 16 columns, 54 nonzeros
+
+CPU model: AMD Ryzen 7 6800H with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 28 rows, 16 columns and 54 nonzeros
+Model fingerprint: 0xbaa5858a
+Variable types: 0 continuous, 16 integer (16 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [1e+00, 4e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Found heuristic solution: objective 26.0000000
+Presolve removed 28 rows and 16 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 26 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.600000000000e+01, best bound 2.600000000000e+01, gap 0.0000%
+
+Wrote result file './output/out.sol'
+
+------------------ Schedule ------------------
+ILP Scheduling Result
+	<And>	<OR>	<NOT>
+Step 1:	{ h }	{ j }	{ i }
+Step 2:	{ m l }	{ g }	{ }
+Step 3:	{ n }	{ k }	{ p }
+Step 4:	{ o }	{ }	{ q }
+Latency: 4
+End
+

@@ -1,0 +1,259 @@
+
+Gurobi 10.0.3 (linux64, gurobi_cl) logging started Fri Oct 20 16:31:51 2023
+
+Set parameter Username
+Set parameter LogFile to value "gurobi.log"
+Academic license - for non-commercial use only - expires 2024-10-16
+Using license file /home/anhph/gurobi.lic
+
+Gurobi Optimizer version 10.0.3 build v10.0.3rc0 (linux64)
+Copyright (c) 2023, Gurobi Optimization, LLC
+
+Read LP format model from file ./output/out.lp
+Reading time = 0.00 seconds
+obj: 42 rows, 42 columns, 222 nonzeros
+
+CPU model: AMD Ryzen 7 6800H with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 42 rows, 42 columns and 222 nonzeros
+Model fingerprint: 0x1821edd6
+Variable types: 0 continuous, 42 integer (42 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  Objective range  [1e+00, 5e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 3e+00]
+Found heuristic solution: objective 40.0000000
+Presolve removed 6 rows and 8 columns
+Presolve time: 0.00s
+Presolved: 36 rows, 34 columns, 106 nonzeros
+Variable types: 0 continuous, 34 integer (34 binary)
+Found heuristic solution: objective 38.0000000
+
+Root relaxation: cutoff, 14 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0        38.00000   38.00000  0.00%     -    0s
+
+Explored 1 nodes (14 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 2: 38 40 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.800000000000e+01, best bound 3.800000000000e+01, gap 0.0000%
+
+Wrote result file './output/out.sol'
+
+
+Gurobi 10.0.3 (linux64, gurobi_cl) logging started Fri Oct 20 16:38:53 2023
+
+Set parameter Username
+Set parameter LogFile to value "gurobi.log"
+Academic license - for non-commercial use only - expires 2024-10-16
+Using license file /home/anhph/gurobi.lic
+
+Gurobi Optimizer version 10.0.3 build v10.0.3rc0 (linux64)
+Copyright (c) 2023, Gurobi Optimization, LLC
+
+Read LP format model from file ./output/out.lp
+Reading time = 0.22 seconds
+obj: 20046 rows, 120516 columns, 642114 nonzeros
+
+CPU model: AMD Ryzen 7 6800H with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 20046 rows, 120516 columns and 642114 nonzeros
+Model fingerprint: 0xe1d321bd
+Variable types: 0 continuous, 120516 integer (120516 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+01]
+  Objective range  [1e+00, 3e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+02]
+Presolve removed 2157 rows and 9850 columns
+Presolve time: 1.38s
+Presolved: 17889 rows, 110666 columns, 520962 nonzeros
+Variable types: 0 continuous, 110666 integer (110666 binary)
+Deterministic concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+Root barrier log...
+
+Ordering time: 0.02s
+
+Barrier statistics:
+ AA' NZ     : 2.731e+05
+ Factor NZ  : 1.022e+06 (roughly 40 MB of memory)
+ Factor Ops : 1.595e+08 (less than 1 second per iteration)
+ Threads    : 5
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   5.41518390e+07  8.42000000e+02  1.80e+04 0.00e+00  1.25e+03     2s
+   1   2.00152322e+07 -1.11216220e+05  6.65e+03 7.11e+00  4.60e+02     2s
+   2   4.19826551e+06 -1.45668194e+05  1.37e+03 2.32e-01  9.70e+01     2s
+   3   3.22317775e+05 -1.25839139e+05  7.79e+01 2.48e-02  6.94e+00     2s
+   4   1.70343439e+05 -6.32771279e+04  2.78e+01 8.70e-03  2.63e+00     2s
+   5   1.27721601e+05 -8.81007546e+03  1.42e+01 5.68e-14  1.23e+00     2s
+   6   1.07130047e+05  1.97397629e+04  7.87e+00 5.68e-14  6.96e-01     2s
+   7   9.58358483e+04  3.85985562e+04  4.36e+00 5.68e-14  4.23e-01     2s
+   8   9.01761475e+04  5.52379256e+04  2.81e+00 5.68e-14  2.40e-01     2s
+   9   8.70975316e+04  6.33214193e+04  2.02e+00 1.14e-13  1.55e-01     2s
+  10   8.48377789e+04  6.87307372e+04  1.48e+00 5.68e-14  1.00e-01     2s
+  11   8.39481157e+04  7.41932103e+04  1.28e+00 1.14e-13  5.16e-02     2s
+  12   8.24034604e+04  7.53093122e+04  9.24e-01 5.68e-14  3.71e-02     2s
+  13   8.12018299e+04  7.58992341e+04  6.41e-01 1.14e-13  2.85e-02     2s
+  14   8.03976385e+04  7.66861089e+04  4.64e-01 8.53e-14  1.94e-02     2s
+  15   7.95488779e+04  7.72655376e+04  2.84e-01 5.68e-14  1.19e-02     2s
+  16   7.92061187e+04  7.75452342e+04  2.14e-01 5.68e-14  8.46e-03     2s
+  17   7.89732017e+04  7.78060631e+04  1.69e-01 5.68e-14  5.54e-03     2s
+  18   7.85365604e+04  7.78925775e+04  8.64e-02 5.68e-14  3.19e-03     2s
+  19   7.83863664e+04  7.79531924e+04  5.83e-02 4.26e-14  2.14e-03     2s
+  20   7.82176880e+04  7.80158656e+04  2.70e-02 1.14e-13  9.99e-04     2s
+  21   7.81562972e+04  7.80390957e+04  1.56e-02 5.68e-14  5.81e-04     2s
+  22   7.81219132e+04  7.80619023e+04  9.26e-03 1.14e-13  2.71e-04     2s
+  23   7.80831196e+04  7.80680470e+04  2.07e-03 8.53e-14  7.34e-05     2s
+  24   7.80812784e+04  7.80693276e+04  1.73e-03 5.68e-14  5.63e-05     3s
+  25   7.80788340e+04  7.80701867e+04  1.29e-03 5.68e-14  4.01e-05     3s
+  26   7.80751787e+04  7.80706553e+04  6.19e-04 5.68e-14  2.21e-05     3s
+  27   7.80741661e+04  7.80708549e+04  4.35e-04 8.53e-14  1.65e-05     3s
+  28   7.80722520e+04  7.80716904e+04  8.49e-05 5.68e-14  2.57e-06     3s
+  29   7.80717739e+04  7.80717626e+04  5.73e-07 7.11e-14  7.57e-08     3s
+  30   7.80717702e+04  7.80717702e+04  1.71e-11 7.82e-14  7.57e-11     3s
+
+Barrier solved model in 30 iterations and 2.61 seconds (3.56 work units)
+Optimal objective 7.80717702e+04
+
+Concurrent spin time: 0.15s (can be avoided by choosing Method=3)
+
+Solved with barrier
+
+Use crossover to convert LP symmetric solution to basic solution...
+
+Root relaxation: objective 7.807177e+04, 39648 iterations, 1.65 seconds (1.48 work units)
+Total elapsed time = 5.98s
+Total elapsed time = 10.16s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 78071.7702    0 5303          - 78071.7702      -     -   13s
+     0     0 78077.9477    0 5767          - 78077.9477      -     -   20s
+     0     0 78078.1969    0 6070          - 78078.1969      -     -   26s
+     0     0 78078.4242    0 6331          - 78078.4242      -     -   31s
+     0     0 78079.5057    0 6535          - 78079.5057      -     -   37s
+     0     0 78081.2982    0 6595          - 78081.2982      -     -   42s
+     0     0 78081.4275    0 6556          - 78081.4275      -     -   44s
+     0     0 78081.4275    0 6502          - 78081.4275      -     -   45s
+     0     0 78083.0872    0 6215          - 78083.0872      -     -   52s
+     0     0 78084.0929    0 5892          - 78084.0929      -     -   60s
+     0     0 78084.6681    0 5577          - 78084.6681      -     -   70s
+     0     0 78086.7443    0 5087          - 78086.7443      -     -   82s
+     0     0          -    0               - 78086.7443      -     -   91s
+
+Cutting planes:
+  Gomory: 202
+  Cover: 764
+  Clique: 1430
+  MIR: 813
+  StrongCG: 357
+  GUB cover: 2706
+  Zero half: 666
+  RLT: 612
+
+Explored 1 nodes (127821 simplex iterations) in 91.24 seconds (81.24 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 0
+
+Solve interrupted
+Best objective -, best bound 7.808700000000e+04, gap -
+
+Unable to retrieve attribute 'X'
+
+
+Gurobi 10.0.3 (linux64, gurobi_cl) logging started Sat Oct 21 13:35:59 2023
+
+Set parameter Username
+Set parameter LogFile to value "gurobi.log"
+Academic license - for non-commercial use only - expires 2024-10-16
+Using license file /home/anhph/gurobi.lic
+
+Gurobi Optimizer version 10.0.3 build v10.0.3rc0 (linux64)
+Copyright (c) 2023, Gurobi Optimization, LLC
+
+Read LP format model from file ./output/out.lp
+Reading time = 0.00 seconds
+obj: 28 rows, 16 columns, 54 nonzeros
+
+CPU model: AMD Ryzen 7 6800H with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 28 rows, 16 columns and 54 nonzeros
+Model fingerprint: 0xbaa5858a
+Variable types: 0 continuous, 16 integer (16 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [1e+00, 4e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Found heuristic solution: objective 26.0000000
+Presolve removed 28 rows and 16 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 26 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.600000000000e+01, best bound 2.600000000000e+01, gap 0.0000%
+
+Wrote result file './output/out.sol'
+
+
+Gurobi 10.0.3 (linux64, gurobi_cl) logging started Sat Oct 21 13:36:09 2023
+
+Set parameter Username
+Set parameter LogFile to value "gurobi.log"
+Academic license - for non-commercial use only - expires 2024-10-16
+Using license file /home/anhph/gurobi.lic
+
+Gurobi Optimizer version 10.0.3 build v10.0.3rc0 (linux64)
+Copyright (c) 2023, Gurobi Optimization, LLC
+
+Read LP format model from file ./output/out.lp
+Reading time = 0.00 seconds
+obj: 28 rows, 16 columns, 54 nonzeros
+
+CPU model: AMD Ryzen 7 6800H with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 28 rows, 16 columns and 54 nonzeros
+Model fingerprint: 0xbaa5858a
+Variable types: 0 continuous, 16 integer (16 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [1e+00, 4e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Found heuristic solution: objective 26.0000000
+Presolve removed 28 rows and 16 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 26 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.600000000000e+01, best bound 2.600000000000e+01, gap 0.0000%
+
+Wrote result file './output/out.sol'
+

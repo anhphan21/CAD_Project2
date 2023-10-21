@@ -1,0 +1,105 @@
+----------------------------------------
+Module name: CM138
+Input: a b c d e f 
+Output: g h i j k l m n 
+Gate:
+ 6. g=a+b+c+h298
+ 7. h=b+j298+c+h298
+ 8. i=a+l298+c+h298
+ 9. j=j298+l298+c+h298
+ 10. k=a+b+o298+h298
+ 11. l=b+j298+o298+h298
+ 12. m=a+l298+o298+h298
+ 13. n=j298+l298+o298+h298
+ 14. g298=d'
+ 15. h298=f+e+g298
+ 16. j298=a'
+ 17. l298=b'
+ 18. o298=c'
+------------------ Schedule ------------------
+Heuristic Scheduling Result
+	<And>	<OR>	<NOT>
+Step 1:	{ }	{ }	{ g298 o298 l298 }
+Step 2:	{ }	{ h298 }	{ j298 }
+Step 3:	{ }	{ m k i }	{ }
+Step 4:	{ }	{ n l j }	{ }
+Step 5:	{ }	{ h g }	{ }
+Latency: 5
+End
+
+------------------ Schedule ------------------
+ASAP Scheduling Result
+	<And>	<OR>	<NOT>
+Step 1:	{ }	{ }	{ g298 o298 l298 j298 }
+Step 2:	{ }	{ h298 }	{ }
+Step 3:	{ }	{ m k i n l j h g }	{ }
+Latency: 3
+End
+
+------------------ Schedule ------------------
+ALAP Scheduling Result
+	<And>	<OR>	<NOT>
+Step 3:	{ }	{ }	{ g298 }
+Step 4:	{ }	{ h298 }	{ o298 l298 j298 }
+Step 5:	{ }	{ m k i n l j h g }	{ }
+Latency: 5
+End
+
+Set parameter Username
+Set parameter LogFile to value "gurobi.log"
+Academic license - for non-commercial use only - expires 2024-10-16
+Using license file /home/anhph/gurobi.lic
+
+Gurobi Optimizer version 10.0.3 build v10.0.3rc0 (linux64)
+Copyright (c) 2023, Gurobi Optimization, LLC
+
+Read LP format model from file ./output/out.lp
+Reading time = 0.00 seconds
+obj: 42 rows, 42 columns, 222 nonzeros
+
+CPU model: AMD Ryzen 7 6800H with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 42 rows, 42 columns and 222 nonzeros
+Model fingerprint: 0x1821edd6
+Variable types: 0 continuous, 42 integer (42 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  Objective range  [1e+00, 5e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 3e+00]
+Found heuristic solution: objective 40.0000000
+Presolve removed 6 rows and 8 columns
+Presolve time: 0.00s
+Presolved: 36 rows, 34 columns, 106 nonzeros
+Variable types: 0 continuous, 34 integer (34 binary)
+Found heuristic solution: objective 38.0000000
+
+Root relaxation: cutoff, 14 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0        38.00000   38.00000  0.00%     -    0s
+
+Explored 1 nodes (14 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 2: 38 40 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.800000000000e+01, best bound 3.800000000000e+01, gap 0.0000%
+
+Wrote result file './output/out.sol'
+
+------------------ Schedule ------------------
+ILP Scheduling Result
+	<And>	<OR>	<NOT>
+Step 1:	{ }	{ }	{ g298 o298 j298 }
+Step 2:	{ }	{ h298 }	{ l298 }
+Step 3:	{ }	{ m n h }	{ }
+Step 4:	{ }	{ k i j }	{ }
+Step 5:	{ }	{ l g }	{ }
+Latency: 5
+End
+
